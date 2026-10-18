@@ -1,0 +1,2879 @@
+{
+ "scenarios": {
+  "Sticker deck (default: top 300 by fame, pop^1)": {
+   "teams": 300,
+   "pMatch": 0.2168,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3498,
+    "black": 0.1139,
+    "grey": 0.0069,
+    "red": 0.1992,
+    "orange": 0.0142,
+    "brown": 0.0013,
+    "yellow": 0.0554,
+    "green": 0.0501,
+    "blue": 0.189,
+    "purple": 0.0108,
+    "pink": 0.0095
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3498
+    ],
+    [
+     "red",
+     0.1992
+    ],
+    [
+     "blue",
+     0.189
+    ],
+    [
+     "black",
+     0.1139
+    ],
+    [
+     "yellow",
+     0.0554
+    ],
+    [
+     "green",
+     0.0501
+    ],
+    [
+     "orange",
+     0.0142
+    ],
+    [
+     "purple",
+     0.0108
+    ]
+   ]
+  },
+  "Top 100 most famous": {
+   "teams": 100,
+   "pMatch": 0.2285,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3682,
+    "black": 0.137,
+    "grey": 0.0051,
+    "red": 0.1854,
+    "orange": 0.0109,
+    "brown": 0,
+    "yellow": 0.047,
+    "green": 0.0268,
+    "blue": 0.1905,
+    "purple": 0.0134,
+    "pink": 0.0157
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3682
+    ],
+    [
+     "blue",
+     0.1905
+    ],
+    [
+     "red",
+     0.1854
+    ],
+    [
+     "black",
+     0.137
+    ],
+    [
+     "yellow",
+     0.047
+    ],
+    [
+     "green",
+     0.0268
+    ],
+    [
+     "pink",
+     0.0157
+    ],
+    [
+     "purple",
+     0.0134
+    ]
+   ]
+  },
+  "Whole football world (all men's teams, no fame weight)": {
+   "teams": 20824,
+   "pMatch": 0.1828,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2569,
+    "black": 0.0784,
+    "grey": 0.0048,
+    "red": 0.1997,
+    "orange": 0.0321,
+    "brown": 0.0009,
+    "yellow": 0.1025,
+    "green": 0.08,
+    "blue": 0.2295,
+    "purple": 0.0126,
+    "pink": 0.0025
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2569
+    ],
+    [
+     "blue",
+     0.2295
+    ],
+    [
+     "red",
+     0.1997
+    ],
+    [
+     "yellow",
+     0.1025
+    ],
+    [
+     "green",
+     0.08
+    ],
+    [
+     "black",
+     0.0784
+    ],
+    [
+     "orange",
+     0.0321
+    ],
+    [
+     "purple",
+     0.0126
+    ]
+   ]
+  },
+  "All men's teams, fame weighted": {
+   "teams": 20824,
+   "pMatch": 0.1862,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2769,
+    "black": 0.0908,
+    "grey": 0.0051,
+    "red": 0.1971,
+    "orange": 0.0269,
+    "brown": 0.0007,
+    "yellow": 0.0968,
+    "green": 0.0737,
+    "blue": 0.2163,
+    "purple": 0.0132,
+    "pink": 0.0026
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2769
+    ],
+    [
+     "blue",
+     0.2163
+    ],
+    [
+     "red",
+     0.1971
+    ],
+    [
+     "yellow",
+     0.0968
+    ],
+    [
+     "black",
+     0.0908
+    ],
+    [
+     "green",
+     0.0737
+    ],
+    [
+     "orange",
+     0.0269
+    ],
+    [
+     "purple",
+     0.0132
+    ]
+   ]
+  },
+  "Fame weight squared (top 300)": {
+   "teams": 300,
+   "pMatch": 0.217,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3465,
+    "black": 0.1212,
+    "grey": 0.0065,
+    "red": 0.1989,
+    "orange": 0.0132,
+    "brown": 0.001,
+    "yellow": 0.051,
+    "green": 0.0459,
+    "blue": 0.1936,
+    "purple": 0.0113,
+    "pink": 0.0109
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3465
+    ],
+    [
+     "red",
+     0.1989
+    ],
+    [
+     "blue",
+     0.1936
+    ],
+    [
+     "black",
+     0.1212
+    ],
+    [
+     "yellow",
+     0.051
+    ],
+    [
+     "green",
+     0.0459
+    ],
+    [
+     "orange",
+     0.0132
+    ],
+    [
+     "purple",
+     0.0113
+    ]
+   ]
+  },
+  "Clubs only (top 300)": {
+   "teams": 300,
+   "pMatch": 0.2038,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3339,
+    "black": 0.1201,
+    "grey": 0.0085,
+    "red": 0.1749,
+    "orange": 0.0219,
+    "brown": 0.001,
+    "yellow": 0.0726,
+    "green": 0.0453,
+    "blue": 0.1978,
+    "purple": 0.016,
+    "pink": 0.008
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3339
+    ],
+    [
+     "blue",
+     0.1978
+    ],
+    [
+     "red",
+     0.1749
+    ],
+    [
+     "black",
+     0.1201
+    ],
+    [
+     "yellow",
+     0.0726
+    ],
+    [
+     "green",
+     0.0453
+    ],
+    [
+     "orange",
+     0.0219
+    ],
+    [
+     "purple",
+     0.016
+    ]
+   ]
+  },
+  "National teams only (FIFA men)": {
+   "teams": 229,
+   "pMatch": 0.2098,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.263,
+    "black": 0.0263,
+    "grey": 0.0032,
+    "red": 0.2769,
+    "orange": 0.0184,
+    "brown": 0,
+    "yellow": 0.102,
+    "green": 0.0992,
+    "blue": 0.2066,
+    "purple": 0.0044,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.2769
+    ],
+    [
+     "white",
+     0.263
+    ],
+    [
+     "blue",
+     0.2066
+    ],
+    [
+     "yellow",
+     0.102
+    ],
+    [
+     "green",
+     0.0992
+    ],
+    [
+     "black",
+     0.0263
+    ],
+    [
+     "orange",
+     0.0184
+    ],
+    [
+     "purple",
+     0.0044
+    ]
+   ]
+  },
+  "Women's teams only": {
+   "teams": 1392,
+   "pMatch": 0.1878,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2804,
+    "black": 0.0897,
+    "grey": 0.0047,
+    "red": 0.1994,
+    "orange": 0.0291,
+    "brown": 0.0008,
+    "yellow": 0.0898,
+    "green": 0.0644,
+    "blue": 0.2189,
+    "purple": 0.017,
+    "pink": 0.0058
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2804
+    ],
+    [
+     "blue",
+     0.2189
+    ],
+    [
+     "red",
+     0.1994
+    ],
+    [
+     "yellow",
+     0.0898
+    ],
+    [
+     "black",
+     0.0897
+    ],
+    [
+     "green",
+     0.0644
+    ],
+    [
+     "orange",
+     0.0291
+    ],
+    [
+     "purple",
+     0.017
+    ]
+   ]
+  },
+  "Home kits only": {
+   "teams": 300,
+   "pMatch": 0.2293,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3415,
+    "black": 0.0657,
+    "grey": 0,
+    "red": 0.2439,
+    "orange": 0.0152,
+    "brown": 0,
+    "yellow": 0.0577,
+    "green": 0.0528,
+    "blue": 0.2057,
+    "purple": 0.0087,
+    "pink": 0.0088
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3415
+    ],
+    [
+     "red",
+     0.2439
+    ],
+    [
+     "blue",
+     0.2057
+    ],
+    [
+     "black",
+     0.0657
+    ],
+    [
+     "yellow",
+     0.0577
+    ],
+    [
+     "green",
+     0.0528
+    ],
+    [
+     "orange",
+     0.0152
+    ],
+    [
+     "pink",
+     0.0088
+    ]
+   ]
+  },
+  "Detailed colour names": {
+   "teams": 300,
+   "pMatch": 0.1847,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3498,
+    "black": 0.1139,
+    "grey": 0.0069,
+    "red": 0.1612,
+    "claret": 0.0381,
+    "orange": 0.0142,
+    "brown": 0.0013,
+    "yellow": 0.0593,
+    "green": 0.0504,
+    "sky": 0.0305,
+    "blue": 0.1135,
+    "navy": 0.0408,
+    "purple": 0.0108,
+    "pink": 0.0095
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3498
+    ],
+    [
+     "red",
+     0.1612
+    ],
+    [
+     "black",
+     0.1139
+    ],
+    [
+     "blue",
+     0.1135
+    ],
+    [
+     "yellow",
+     0.0593
+    ],
+    [
+     "green",
+     0.0504
+    ],
+    [
+     "navy",
+     0.0408
+    ],
+    [
+     "claret",
+     0.0381
+    ]
+   ]
+  },
+  "Variant: every colour counts (>=12% of shirt)": {
+   "teams": 300,
+   "pMatch": 0.4329,
+   "avgColours": 1.487,
+   "freq": {
+    "white": 0.51,
+    "black": 0.1738,
+    "grey": 0.0195,
+    "red": 0.294,
+    "orange": 0.0259,
+    "brown": 0.0035,
+    "yellow": 0.0818,
+    "green": 0.0745,
+    "blue": 0.2747,
+    "purple": 0.0188,
+    "pink": 0.0108
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2005
+    ],
+    [
+     "red",
+     0.1132
+    ],
+    [
+     "blue",
+     0.1092
+    ],
+    [
+     "white+red",
+     0.0987
+    ],
+    [
+     "white+blue",
+     0.0835
+    ],
+    [
+     "black",
+     0.0463
+    ],
+    [
+     "yellow",
+     0.0373
+    ],
+    [
+     "white+black",
+     0.0337
+    ]
+   ]
+  },
+  "Ties go to white/black first": {
+   "teams": 300,
+   "pMatch": 0.2219,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3607,
+    "black": 0.1139,
+    "grey": 0.0069,
+    "red": 0.1985,
+    "orange": 0.0142,
+    "brown": 0.0013,
+    "yellow": 0.0551,
+    "green": 0.0498,
+    "blue": 0.1831,
+    "purple": 0.0108,
+    "pink": 0.0058
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3607
+    ],
+    [
+     "red",
+     0.1985
+    ],
+    [
+     "blue",
+     0.1831
+    ],
+    [
+     "black",
+     0.1139
+    ],
+    [
+     "yellow",
+     0.0551
+    ],
+    [
+     "green",
+     0.0498
+    ],
+    [
+     "orange",
+     0.0142
+    ],
+    [
+     "purple",
+     0.0108
+    ]
+   ]
+  },
+  "No tie tolerance (strict largest share)": {
+   "teams": 300,
+   "pMatch": 0.2161,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3557,
+    "black": 0.1149,
+    "grey": 0.0069,
+    "red": 0.1918,
+    "orange": 0.0142,
+    "brown": 0.0013,
+    "yellow": 0.0593,
+    "green": 0.0498,
+    "blue": 0.1816,
+    "purple": 0.0148,
+    "pink": 0.0098
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3557
+    ],
+    [
+     "red",
+     0.1918
+    ],
+    [
+     "blue",
+     0.1816
+    ],
+    [
+     "black",
+     0.1149
+    ],
+    [
+     "yellow",
+     0.0593
+    ],
+    [
+     "green",
+     0.0498
+    ],
+    [
+     "purple",
+     0.0148
+    ],
+    [
+     "orange",
+     0.0142
+    ]
+   ]
+  }
+ },
+ "confed": {
+  "UEFA clubs": {
+   "teams": 11719,
+   "pMatch": 0.1878,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.251,
+    "black": 0.0762,
+    "grey": 0.0042,
+    "red": 0.2128,
+    "orange": 0.0244,
+    "brown": 0.0008,
+    "yellow": 0.1029,
+    "green": 0.0764,
+    "blue": 0.2378,
+    "purple": 0.0118,
+    "pink": 0.0017
+   },
+   "topCombos": [
+    [
+     "white",
+     0.251
+    ],
+    [
+     "blue",
+     0.2378
+    ],
+    [
+     "red",
+     0.2128
+    ],
+    [
+     "yellow",
+     0.1029
+    ],
+    [
+     "green",
+     0.0764
+    ],
+    [
+     "black",
+     0.0762
+    ],
+    [
+     "orange",
+     0.0244
+    ],
+    [
+     "purple",
+     0.0118
+    ]
+   ]
+  },
+  "UEFA national": {
+   "teams": 58,
+   "pMatch": 0.2628,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3169,
+    "black": 0.0252,
+    "grey": 0,
+    "red": 0.3122,
+    "orange": 0.0127,
+    "brown": 0,
+    "yellow": 0.0586,
+    "green": 0.03,
+    "blue": 0.2445,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3169
+    ],
+    [
+     "red",
+     0.3122
+    ],
+    [
+     "blue",
+     0.2445
+    ],
+    [
+     "yellow",
+     0.0586
+    ],
+    [
+     "green",
+     0.03
+    ],
+    [
+     "black",
+     0.0252
+    ],
+    [
+     "orange",
+     0.0127
+    ]
+   ]
+  },
+  "CONMEBOL clubs": {
+   "teams": 1864,
+   "pMatch": 0.2094,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3455,
+    "black": 0.0846,
+    "grey": 0.0039,
+    "red": 0.1601,
+    "orange": 0.0203,
+    "brown": 0.0008,
+    "yellow": 0.0733,
+    "green": 0.0888,
+    "blue": 0.2083,
+    "purple": 0.0088,
+    "pink": 0.0055
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3455
+    ],
+    [
+     "blue",
+     0.2083
+    ],
+    [
+     "red",
+     0.1601
+    ],
+    [
+     "green",
+     0.0888
+    ],
+    [
+     "black",
+     0.0846
+    ],
+    [
+     "yellow",
+     0.0733
+    ],
+    [
+     "orange",
+     0.0203
+    ],
+    [
+     "purple",
+     0.0088
+    ]
+   ]
+  },
+  "CONMEBOL national": {
+   "teams": 11,
+   "pMatch": 0.1963,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2365,
+    "black": 0.0711,
+    "grey": 0,
+    "red": 0.2016,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.1962,
+    "green": 0.0672,
+    "blue": 0.2274,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2365
+    ],
+    [
+     "blue",
+     0.2274
+    ],
+    [
+     "red",
+     0.2016
+    ],
+    [
+     "yellow",
+     0.1962
+    ],
+    [
+     "black",
+     0.0711
+    ],
+    [
+     "green",
+     0.0672
+    ]
+   ]
+  },
+  "CONCACAF clubs": {
+   "teams": 1715,
+   "pMatch": 0.1778,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2735,
+    "black": 0.1243,
+    "grey": 0.009,
+    "red": 0.1647,
+    "orange": 0.0454,
+    "brown": 0.0008,
+    "yellow": 0.084,
+    "green": 0.0651,
+    "blue": 0.2163,
+    "purple": 0.0141,
+    "pink": 0.0028
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2735
+    ],
+    [
+     "blue",
+     0.2163
+    ],
+    [
+     "red",
+     0.1647
+    ],
+    [
+     "black",
+     0.1243
+    ],
+    [
+     "yellow",
+     0.084
+    ],
+    [
+     "green",
+     0.0651
+    ],
+    [
+     "orange",
+     0.0454
+    ],
+    [
+     "purple",
+     0.0141
+    ]
+   ]
+  },
+  "CONCACAF national": {
+   "teams": 37,
+   "pMatch": 0.186,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2158,
+    "black": 0.0578,
+    "grey": 0,
+    "red": 0.2134,
+    "orange": 0.0184,
+    "brown": 0,
+    "yellow": 0.1643,
+    "green": 0.0995,
+    "blue": 0.2308,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "blue",
+     0.2308
+    ],
+    [
+     "white",
+     0.2158
+    ],
+    [
+     "red",
+     0.2134
+    ],
+    [
+     "yellow",
+     0.1643
+    ],
+    [
+     "green",
+     0.0995
+    ],
+    [
+     "black",
+     0.0578
+    ],
+    [
+     "orange",
+     0.0184
+    ]
+   ]
+  },
+  "CAF clubs": {
+   "teams": 1194,
+   "pMatch": 0.1765,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2768,
+    "black": 0.0648,
+    "grey": 0.0023,
+    "red": 0.1771,
+    "orange": 0.0366,
+    "brown": 0.0006,
+    "yellow": 0.1413,
+    "green": 0.1194,
+    "blue": 0.1692,
+    "purple": 0.0091,
+    "pink": 0.0027
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2768
+    ],
+    [
+     "red",
+     0.1771
+    ],
+    [
+     "blue",
+     0.1692
+    ],
+    [
+     "yellow",
+     0.1413
+    ],
+    [
+     "green",
+     0.1194
+    ],
+    [
+     "black",
+     0.0648
+    ],
+    [
+     "orange",
+     0.0366
+    ],
+    [
+     "purple",
+     0.0091
+    ]
+   ]
+  },
+  "CAF national": {
+   "teams": 62,
+   "pMatch": 0.2019,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2573,
+    "black": 0.0158,
+    "grey": 0,
+    "red": 0.2537,
+    "orange": 0.029,
+    "brown": 0,
+    "yellow": 0.0939,
+    "green": 0.1833,
+    "blue": 0.1671,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2573
+    ],
+    [
+     "red",
+     0.2537
+    ],
+    [
+     "green",
+     0.1833
+    ],
+    [
+     "blue",
+     0.1671
+    ],
+    [
+     "yellow",
+     0.0939
+    ],
+    [
+     "orange",
+     0.029
+    ],
+    [
+     "black",
+     0.0158
+    ]
+   ]
+  },
+  "AFC clubs": {
+   "teams": 2700,
+   "pMatch": 0.1689,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2164,
+    "black": 0.0562,
+    "grey": 0.0062,
+    "red": 0.2039,
+    "orange": 0.0597,
+    "brown": 0.0005,
+    "yellow": 0.1175,
+    "green": 0.0877,
+    "blue": 0.2276,
+    "purple": 0.0212,
+    "pink": 0.0032
+   },
+   "topCombos": [
+    [
+     "blue",
+     0.2276
+    ],
+    [
+     "white",
+     0.2164
+    ],
+    [
+     "red",
+     0.2039
+    ],
+    [
+     "yellow",
+     0.1175
+    ],
+    [
+     "green",
+     0.0877
+    ],
+    [
+     "orange",
+     0.0597
+    ],
+    [
+     "black",
+     0.0562
+    ],
+    [
+     "purple",
+     0.0212
+    ]
+   ]
+  },
+  "AFC national": {
+   "teams": 49,
+   "pMatch": 0.2327,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2555,
+    "black": 0.0082,
+    "grey": 0,
+    "red": 0.3467,
+    "orange": 0.0204,
+    "brown": 0,
+    "yellow": 0.0902,
+    "green": 0.0803,
+    "blue": 0.1783,
+    "purple": 0.0204,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.3467
+    ],
+    [
+     "white",
+     0.2555
+    ],
+    [
+     "blue",
+     0.1783
+    ],
+    [
+     "yellow",
+     0.0902
+    ],
+    [
+     "green",
+     0.0803
+    ],
+    [
+     "purple",
+     0.0204
+    ],
+    [
+     "orange",
+     0.0204
+    ],
+    [
+     "black",
+     0.0082
+    ]
+   ]
+  },
+  "OFC clubs": {
+   "teams": 211,
+   "pMatch": 0.1754,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.202,
+    "black": 0.145,
+    "grey": 0.0012,
+    "red": 0.2098,
+    "orange": 0.0354,
+    "brown": 0,
+    "yellow": 0.1081,
+    "green": 0.0709,
+    "blue": 0.2271,
+    "purple": 0.0004,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "blue",
+     0.2271
+    ],
+    [
+     "red",
+     0.2098
+    ],
+    [
+     "white",
+     0.202
+    ],
+    [
+     "black",
+     0.145
+    ],
+    [
+     "yellow",
+     0.1081
+    ],
+    [
+     "green",
+     0.0709
+    ],
+    [
+     "orange",
+     0.0354
+    ],
+    [
+     "grey",
+     0.0012
+    ]
+   ]
+  },
+  "OFC national": {
+   "teams": 12,
+   "pMatch": 0.1894,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2319,
+    "black": 0.0217,
+    "grey": 0.0616,
+    "red": 0.2065,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.1232,
+    "green": 0.1051,
+    "blue": 0.25,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "blue",
+     0.25
+    ],
+    [
+     "white",
+     0.2319
+    ],
+    [
+     "red",
+     0.2065
+    ],
+    [
+     "yellow",
+     0.1232
+    ],
+    [
+     "green",
+     0.1051
+    ],
+    [
+     "grey",
+     0.0616
+    ],
+    [
+     "black",
+     0.0217
+    ]
+   ]
+  }
+ },
+ "leagues": {
+  "Premier League": {
+   "teams": 22,
+   "pMatch": 0.227,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3109,
+    "black": 0.1382,
+    "grey": 0,
+    "red": 0.2164,
+    "orange": 0.0109,
+    "brown": 0,
+    "yellow": 0.0218,
+    "green": 0.0182,
+    "blue": 0.2509,
+    "purple": 0.0182,
+    "pink": 0.0145
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3109
+    ],
+    [
+     "blue",
+     0.2509
+    ],
+    [
+     "red",
+     0.2164
+    ],
+    [
+     "black",
+     0.1382
+    ],
+    [
+     "yellow",
+     0.0218
+    ],
+    [
+     "purple",
+     0.0182
+    ],
+    [
+     "green",
+     0.0182
+    ],
+    [
+     "pink",
+     0.0145
+    ]
+   ]
+  },
+  "La Liga": {
+   "teams": 20,
+   "pMatch": 0.2391,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.383,
+    "black": 0.117,
+    "grey": 0.012,
+    "red": 0.177,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.042,
+    "green": 0.05,
+    "blue": 0.207,
+    "purple": 0.012,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.383
+    ],
+    [
+     "blue",
+     0.207
+    ],
+    [
+     "red",
+     0.177
+    ],
+    [
+     "black",
+     0.117
+    ],
+    [
+     "green",
+     0.05
+    ],
+    [
+     "yellow",
+     0.042
+    ],
+    [
+     "grey",
+     0.012
+    ],
+    [
+     "purple",
+     0.012
+    ]
+   ]
+  },
+  "Ligue 1": {
+   "teams": 22,
+   "pMatch": 0.2112,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3175,
+    "black": 0.0772,
+    "grey": 0,
+    "red": 0.1936,
+    "orange": 0.0336,
+    "brown": 0,
+    "yellow": 0.1063,
+    "green": 0.0036,
+    "blue": 0.2308,
+    "purple": 0.0336,
+    "pink": 0.0036
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3175
+    ],
+    [
+     "blue",
+     0.2308
+    ],
+    [
+     "red",
+     0.1936
+    ],
+    [
+     "yellow",
+     0.1063
+    ],
+    [
+     "black",
+     0.0772
+    ],
+    [
+     "purple",
+     0.0336
+    ],
+    [
+     "orange",
+     0.0336
+    ],
+    [
+     "pink",
+     0.0036
+    ]
+   ]
+  },
+  "Eredivisie": {
+   "teams": 21,
+   "pMatch": 0.2104,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3085,
+    "black": 0.1285,
+    "grey": 0.0124,
+    "red": 0.2696,
+    "orange": 0.0352,
+    "brown": 0,
+    "yellow": 0.1028,
+    "green": 0.0277,
+    "blue": 0.1154,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3085
+    ],
+    [
+     "red",
+     0.2696
+    ],
+    [
+     "black",
+     0.1285
+    ],
+    [
+     "blue",
+     0.1154
+    ],
+    [
+     "yellow",
+     0.1028
+    ],
+    [
+     "orange",
+     0.0352
+    ],
+    [
+     "green",
+     0.0277
+    ],
+    [
+     "grey",
+     0.0124
+    ]
+   ]
+  },
+  "Primeira Liga": {
+   "teams": 18,
+   "pMatch": 0.2106,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3313,
+    "black": 0.1555,
+    "grey": 0,
+    "red": 0.2132,
+    "orange": 0.0089,
+    "brown": 0,
+    "yellow": 0.1055,
+    "green": 0.0422,
+    "blue": 0.1345,
+    "purple": 0.0089,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3313
+    ],
+    [
+     "red",
+     0.2132
+    ],
+    [
+     "black",
+     0.1555
+    ],
+    [
+     "blue",
+     0.1345
+    ],
+    [
+     "yellow",
+     0.1055
+    ],
+    [
+     "green",
+     0.0422
+    ],
+    [
+     "purple",
+     0.0089
+    ],
+    [
+     "orange",
+     0.0089
+    ]
+   ]
+  },
+  "Süper Lig": {
+   "teams": 19,
+   "pMatch": 0.1811,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2241,
+    "black": 0.1509,
+    "grey": 0.0042,
+    "red": 0.268,
+    "orange": 0.0722,
+    "brown": 0,
+    "yellow": 0.0393,
+    "green": 0.0722,
+    "blue": 0.1552,
+    "purple": 0.0139,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.268
+    ],
+    [
+     "white",
+     0.2241
+    ],
+    [
+     "blue",
+     0.1552
+    ],
+    [
+     "black",
+     0.1509
+    ],
+    [
+     "green",
+     0.0722
+    ],
+    [
+     "orange",
+     0.0722
+    ],
+    [
+     "yellow",
+     0.0393
+    ],
+    [
+     "purple",
+     0.0139
+    ]
+   ]
+  },
+  "Scottish Premiership": {
+   "teams": 13,
+   "pMatch": 0.1917,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2878,
+    "black": 0.0324,
+    "grey": 0.0201,
+    "red": 0.1493,
+    "orange": 0.0569,
+    "brown": 0,
+    "yellow": 0.1338,
+    "green": 0.0708,
+    "blue": 0.2429,
+    "purple": 0.0062,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2878
+    ],
+    [
+     "blue",
+     0.2429
+    ],
+    [
+     "red",
+     0.1493
+    ],
+    [
+     "yellow",
+     0.1338
+    ],
+    [
+     "green",
+     0.0708
+    ],
+    [
+     "orange",
+     0.0569
+    ],
+    [
+     "black",
+     0.0324
+    ],
+    [
+     "grey",
+     0.0201
+    ]
+   ]
+  },
+  "Campeonato Brasileiro Série A": {
+   "teams": 25,
+   "pMatch": 0.2687,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.4265,
+    "black": 0.2088,
+    "grey": 0,
+    "red": 0.1752,
+    "orange": 0.0064,
+    "brown": 0,
+    "yellow": 0.0432,
+    "green": 0.0904,
+    "blue": 0.0496,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.4265
+    ],
+    [
+     "black",
+     0.2088
+    ],
+    [
+     "red",
+     0.1752
+    ],
+    [
+     "green",
+     0.0904
+    ],
+    [
+     "blue",
+     0.0496
+    ],
+    [
+     "yellow",
+     0.0432
+    ],
+    [
+     "orange",
+     0.0064
+    ]
+   ]
+  },
+  "Argentine Primera División": {
+   "teams": 38,
+   "pMatch": 0.2562,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.435,
+    "black": 0.0886,
+    "grey": 0.0021,
+    "red": 0.1777,
+    "orange": 0.031,
+    "brown": 0.0064,
+    "yellow": 0.0203,
+    "green": 0.1181,
+    "blue": 0.1102,
+    "purple": 0.0064,
+    "pink": 0.0043
+   },
+   "topCombos": [
+    [
+     "white",
+     0.435
+    ],
+    [
+     "red",
+     0.1777
+    ],
+    [
+     "green",
+     0.1181
+    ],
+    [
+     "blue",
+     0.1102
+    ],
+    [
+     "black",
+     0.0886
+    ],
+    [
+     "orange",
+     0.031
+    ],
+    [
+     "yellow",
+     0.0203
+    ],
+    [
+     "purple",
+     0.0064
+    ]
+   ]
+  },
+  "Liga MX": {
+   "teams": 24,
+   "pMatch": 0.2055,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2907,
+    "black": 0.1184,
+    "grey": 0,
+    "red": 0.1904,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.063,
+    "green": 0.0987,
+    "blue": 0.2387,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2907
+    ],
+    [
+     "blue",
+     0.2387
+    ],
+    [
+     "red",
+     0.1904
+    ],
+    [
+     "black",
+     0.1184
+    ],
+    [
+     "green",
+     0.0987
+    ],
+    [
+     "yellow",
+     0.063
+    ]
+   ]
+  },
+  "Major League Soccer": {
+   "teams": 33,
+   "pMatch": 0.1991,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2104,
+    "black": 0.223,
+    "grey": 0,
+    "red": 0.0926,
+    "orange": 0.0285,
+    "brown": 0,
+    "yellow": 0.0582,
+    "green": 0.0691,
+    "blue": 0.2951,
+    "purple": 0.0024,
+    "pink": 0.0206
+   },
+   "topCombos": [
+    [
+     "blue",
+     0.2951
+    ],
+    [
+     "black",
+     0.223
+    ],
+    [
+     "white",
+     0.2104
+    ],
+    [
+     "red",
+     0.0926
+    ],
+    [
+     "green",
+     0.0691
+    ],
+    [
+     "yellow",
+     0.0582
+    ],
+    [
+     "orange",
+     0.0285
+    ],
+    [
+     "pink",
+     0.0206
+    ]
+   ]
+  },
+  "J1 League": {
+   "teams": 23,
+   "pMatch": 0.2128,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3526,
+    "black": 0.0444,
+    "grey": 0.0113,
+    "red": 0.1285,
+    "orange": 0.087,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0.087,
+    "blue": 0.225,
+    "purple": 0.0643,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3526
+    ],
+    [
+     "blue",
+     0.225
+    ],
+    [
+     "red",
+     0.1285
+    ],
+    [
+     "green",
+     0.087
+    ],
+    [
+     "orange",
+     0.087
+    ],
+    [
+     "purple",
+     0.0643
+    ],
+    [
+     "black",
+     0.0444
+    ],
+    [
+     "grey",
+     0.0113
+    ]
+   ]
+  },
+  "K League 1": {
+   "teams": 13,
+   "pMatch": 0.2168,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2977,
+    "black": 0,
+    "grey": 0,
+    "red": 0.3043,
+    "orange": 0.0569,
+    "brown": 0,
+    "yellow": 0.0569,
+    "green": 0.1137,
+    "blue": 0.1137,
+    "purple": 0.0569,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.3043
+    ],
+    [
+     "white",
+     0.2977
+    ],
+    [
+     "blue",
+     0.1137
+    ],
+    [
+     "green",
+     0.1137
+    ],
+    [
+     "orange",
+     0.0569
+    ],
+    [
+     "yellow",
+     0.0569
+    ],
+    [
+     "purple",
+     0.0569
+    ]
+   ]
+  },
+  "Saudi Pro League": {
+   "teams": 17,
+   "pMatch": 0.1675,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2375,
+    "black": 0.0497,
+    "grey": 0.0049,
+    "red": 0.1226,
+    "orange": 0.1072,
+    "brown": 0,
+    "yellow": 0.2099,
+    "green": 0.102,
+    "blue": 0.1662,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2375
+    ],
+    [
+     "yellow",
+     0.2099
+    ],
+    [
+     "blue",
+     0.1662
+    ],
+    [
+     "red",
+     0.1226
+    ],
+    [
+     "orange",
+     0.1072
+    ],
+    [
+     "green",
+     0.102
+    ],
+    [
+     "black",
+     0.0497
+    ],
+    [
+     "grey",
+     0.0049
+    ]
+   ]
+  },
+  "Persian Gulf Pro League": {
+   "teams": 19,
+   "pMatch": 0.1895,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2496,
+    "black": 0.0642,
+    "grey": 0,
+    "red": 0.1631,
+    "orange": 0.0389,
+    "brown": 0,
+    "yellow": 0.1273,
+    "green": 0.0915,
+    "blue": 0.2654,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "blue",
+     0.2654
+    ],
+    [
+     "white",
+     0.2496
+    ],
+    [
+     "red",
+     0.1631
+    ],
+    [
+     "yellow",
+     0.1273
+    ],
+    [
+     "green",
+     0.0915
+    ],
+    [
+     "black",
+     0.0642
+    ],
+    [
+     "orange",
+     0.0389
+    ]
+   ]
+  },
+  "Egyptian Premier League": {
+   "teams": 15,
+   "pMatch": 0.1676,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.215,
+    "black": 0.088,
+    "grey": 0.016,
+    "red": 0.1932,
+    "orange": 0.0174,
+    "brown": 0,
+    "yellow": 0.1492,
+    "green": 0.1294,
+    "blue": 0.1919,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.215
+    ],
+    [
+     "red",
+     0.1932
+    ],
+    [
+     "blue",
+     0.1919
+    ],
+    [
+     "yellow",
+     0.1492
+    ],
+    [
+     "green",
+     0.1294
+    ],
+    [
+     "black",
+     0.088
+    ],
+    [
+     "orange",
+     0.0174
+    ],
+    [
+     "grey",
+     0.016
+    ]
+   ]
+  },
+  "A-League Men": {
+   "teams": 15,
+   "pMatch": 0.1865,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.1779,
+    "black": 0.2652,
+    "grey": 0,
+    "red": 0.0986,
+    "orange": 0.0453,
+    "brown": 0,
+    "yellow": 0.1106,
+    "green": 0,
+    "blue": 0.2372,
+    "purple": 0.0653,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "black",
+     0.2652
+    ],
+    [
+     "blue",
+     0.2372
+    ],
+    [
+     "white",
+     0.1779
+    ],
+    [
+     "yellow",
+     0.1106
+    ],
+    [
+     "red",
+     0.0986
+    ],
+    [
+     "purple",
+     0.0653
+    ],
+    [
+     "orange",
+     0.0453
+    ]
+   ]
+  },
+  "Russian Premier League": {
+   "teams": 16,
+   "pMatch": 0.2001,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2814,
+    "black": 0.0562,
+    "grey": 0,
+    "red": 0.1575,
+    "orange": 0.0575,
+    "brown": 0,
+    "yellow": 0.0462,
+    "green": 0.1413,
+    "blue": 0.2599,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2814
+    ],
+    [
+     "blue",
+     0.2599
+    ],
+    [
+     "red",
+     0.1575
+    ],
+    [
+     "green",
+     0.1413
+    ],
+    [
+     "orange",
+     0.0575
+    ],
+    [
+     "black",
+     0.0562
+    ],
+    [
+     "yellow",
+     0.0462
+    ]
+   ]
+  }
+ },
+ "decades": {
+  "1880s": {
+   "teams": 15,
+   "pMatch": 0.2558,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3014,
+    "black": 0,
+    "grey": 0,
+    "red": 0.2319,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0.2667,
+    "blue": 0.2,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3014
+    ],
+    [
+     "green",
+     0.2667
+    ],
+    [
+     "red",
+     0.2319
+    ],
+    [
+     "blue",
+     0.2
+    ]
+   ],
+   "seasons": 15
+  },
+  "1890s": {
+   "teams": 42,
+   "pMatch": 0.2624,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3014,
+    "black": 0.0124,
+    "grey": 0,
+    "red": 0.2985,
+    "orange": 0.0162,
+    "brown": 0,
+    "yellow": 0.0019,
+    "green": 0.102,
+    "blue": 0.2676,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3014
+    ],
+    [
+     "red",
+     0.2985
+    ],
+    [
+     "blue",
+     0.2676
+    ],
+    [
+     "green",
+     0.102
+    ],
+    [
+     "orange",
+     0.0162
+    ],
+    [
+     "black",
+     0.0124
+    ],
+    [
+     "yellow",
+     0.0019
+    ]
+   ],
+   "seasons": 42
+  },
+  "1900s": {
+   "teams": 60,
+   "pMatch": 0.3633,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.4246,
+    "black": 0,
+    "grey": 0,
+    "red": 0.4118,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0.0746,
+    "blue": 0.089,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.4246
+    ],
+    [
+     "red",
+     0.4118
+    ],
+    [
+     "blue",
+     0.089
+    ],
+    [
+     "green",
+     0.0746
+    ]
+   ],
+   "seasons": 60
+  },
+  "1910s": {
+   "teams": 52,
+   "pMatch": 0.3662,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3428,
+    "black": 0,
+    "grey": 0,
+    "red": 0.4565,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0,
+    "blue": 0.2007,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.4565
+    ],
+    [
+     "white",
+     0.3428
+    ],
+    [
+     "blue",
+     0.2007
+    ]
+   ],
+   "seasons": 52
+  },
+  "1920s": {
+   "teams": 50,
+   "pMatch": 0.3346,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3626,
+    "black": 0,
+    "grey": 0,
+    "red": 0.3174,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0,
+    "blue": 0.32,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3626
+    ],
+    [
+     "blue",
+     0.32
+    ],
+    [
+     "red",
+     0.3174
+    ]
+   ],
+   "seasons": 50
+  },
+  "1930s": {
+   "teams": 53,
+   "pMatch": 0.3267,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3543,
+    "black": 0,
+    "grey": 0,
+    "red": 0.3598,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0.0189,
+    "blue": 0.267,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.3598
+    ],
+    [
+     "white",
+     0.3543
+    ],
+    [
+     "blue",
+     0.267
+    ],
+    [
+     "green",
+     0.0189
+    ]
+   ],
+   "seasons": 53
+  },
+  "1940s": {
+   "teams": 72,
+   "pMatch": 0.3304,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2797,
+    "black": 0.0011,
+    "grey": 0,
+    "red": 0.4124,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0,
+    "green": 0.0211,
+    "blue": 0.2856,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.4124
+    ],
+    [
+     "blue",
+     0.2856
+    ],
+    [
+     "white",
+     0.2797
+    ],
+    [
+     "green",
+     0.0211
+    ],
+    [
+     "black",
+     0.0011
+    ]
+   ],
+   "seasons": 72
+  },
+  "1950s": {
+   "teams": 87,
+   "pMatch": 0.3363,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2498,
+    "black": 0,
+    "grey": 0.003,
+    "red": 0.4289,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.0127,
+    "green": 0.006,
+    "blue": 0.2996,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.4289
+    ],
+    [
+     "blue",
+     0.2996
+    ],
+    [
+     "white",
+     0.2498
+    ],
+    [
+     "yellow",
+     0.0127
+    ],
+    [
+     "green",
+     0.006
+    ],
+    [
+     "grey",
+     0.003
+    ]
+   ],
+   "seasons": 87
+  },
+  "1960s": {
+   "teams": 97,
+   "pMatch": 0.3196,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3457,
+    "black": 0.0084,
+    "grey": 0,
+    "red": 0.3834,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.0316,
+    "green": 0.0027,
+    "blue": 0.2282,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.3834
+    ],
+    [
+     "white",
+     0.3457
+    ],
+    [
+     "blue",
+     0.2282
+    ],
+    [
+     "yellow",
+     0.0316
+    ],
+    [
+     "black",
+     0.0084
+    ],
+    [
+     "green",
+     0.0027
+    ]
+   ],
+   "seasons": 97
+  },
+  "1970s": {
+   "teams": 116,
+   "pMatch": 0.3081,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2584,
+    "black": 0,
+    "grey": 0,
+    "red": 0.4086,
+    "orange": 0,
+    "brown": 0,
+    "yellow": 0.0691,
+    "green": 0,
+    "blue": 0.2639,
+    "purple": 0,
+    "pink": 0
+   },
+   "topCombos": [
+    [
+     "red",
+     0.4086
+    ],
+    [
+     "blue",
+     0.2639
+    ],
+    [
+     "white",
+     0.2584
+    ],
+    [
+     "yellow",
+     0.0691
+    ]
+   ],
+   "seasons": 116
+  },
+  "1980s": {
+   "teams": 157,
+   "pMatch": 0.2814,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3227,
+    "black": 0.0052,
+    "grey": 0.0129,
+    "red": 0.338,
+    "orange": 0.0015,
+    "brown": 0,
+    "yellow": 0.0508,
+    "green": 0.0241,
+    "blue": 0.2442,
+    "purple": 0,
+    "pink": 0.0005
+   },
+   "topCombos": [
+    [
+     "red",
+     0.338
+    ],
+    [
+     "white",
+     0.3227
+    ],
+    [
+     "blue",
+     0.2442
+    ],
+    [
+     "yellow",
+     0.0508
+    ],
+    [
+     "green",
+     0.0241
+    ],
+    [
+     "grey",
+     0.0129
+    ],
+    [
+     "black",
+     0.0052
+    ],
+    [
+     "orange",
+     0.0015
+    ]
+   ],
+   "seasons": 157
+  },
+  "1990s": {
+   "teams": 241,
+   "pMatch": 0.2411,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.2881,
+    "black": 0.0364,
+    "grey": 0.0071,
+    "red": 0.2797,
+    "orange": 0.0047,
+    "brown": 0,
+    "yellow": 0.0543,
+    "green": 0.0444,
+    "blue": 0.2708,
+    "purple": 0.0133,
+    "pink": 0.0013
+   },
+   "topCombos": [
+    [
+     "white",
+     0.2881
+    ],
+    [
+     "red",
+     0.2797
+    ],
+    [
+     "blue",
+     0.2708
+    ],
+    [
+     "yellow",
+     0.0543
+    ],
+    [
+     "green",
+     0.0444
+    ],
+    [
+     "black",
+     0.0364
+    ],
+    [
+     "purple",
+     0.0133
+    ],
+    [
+     "grey",
+     0.0071
+    ]
+   ],
+   "seasons": 241
+  },
+  "2000s": {
+   "teams": 324,
+   "pMatch": 0.2393,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3243,
+    "black": 0.079,
+    "grey": 0.0116,
+    "red": 0.2559,
+    "orange": 0.009,
+    "brown": 0.0007,
+    "yellow": 0.0498,
+    "green": 0.0215,
+    "blue": 0.2433,
+    "purple": 0.0033,
+    "pink": 0.0015
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3243
+    ],
+    [
+     "red",
+     0.2559
+    ],
+    [
+     "blue",
+     0.2433
+    ],
+    [
+     "black",
+     0.079
+    ],
+    [
+     "yellow",
+     0.0498
+    ],
+    [
+     "green",
+     0.0215
+    ],
+    [
+     "grey",
+     0.0116
+    ],
+    [
+     "orange",
+     0.009
+    ]
+   ],
+   "seasons": 324
+  },
+  "2010s": {
+   "teams": 379,
+   "pMatch": 0.2433,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3529,
+    "black": 0.1015,
+    "grey": 0.0096,
+    "red": 0.2273,
+    "orange": 0.0072,
+    "brown": 0.0008,
+    "yellow": 0.0479,
+    "green": 0.0124,
+    "blue": 0.2329,
+    "purple": 0.0055,
+    "pink": 0.0021
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3529
+    ],
+    [
+     "blue",
+     0.2329
+    ],
+    [
+     "red",
+     0.2273
+    ],
+    [
+     "black",
+     0.1015
+    ],
+    [
+     "yellow",
+     0.0479
+    ],
+    [
+     "green",
+     0.0124
+    ],
+    [
+     "grey",
+     0.0096
+    ],
+    [
+     "orange",
+     0.0072
+    ]
+   ],
+   "seasons": 379
+  },
+  "2020s": {
+   "teams": 267,
+   "pMatch": 0.2302,
+   "avgColours": 1,
+   "freq": {
+    "white": 0.3357,
+    "black": 0.1336,
+    "grey": 0.0069,
+    "red": 0.2177,
+    "orange": 0.0057,
+    "brown": 0.0009,
+    "yellow": 0.0525,
+    "green": 0.0196,
+    "blue": 0.2213,
+    "purple": 0.0021,
+    "pink": 0.0039
+   },
+   "topCombos": [
+    [
+     "white",
+     0.3357
+    ],
+    [
+     "blue",
+     0.2213
+    ],
+    [
+     "red",
+     0.2177
+    ],
+    [
+     "black",
+     0.1336
+    ],
+    [
+     "yellow",
+     0.0525
+    ],
+    [
+     "green",
+     0.0196
+    ],
+    [
+     "grey",
+     0.0069
+    ],
+    [
+     "orange",
+     0.0057
+    ]
+   ],
+   "seasons": 267
+  }
+ },
+ "theory": {
+  "pMatch": 0.21676216888159536,
+  "simSecondWinsSet": 0.563315,
+  "naiveIndependent": 0.5607776946795838,
+  "setLength": {
+   "2": 0.2166,
+   "3": 0.1586,
+   "4": 0.1274,
+   "5": 0.1021,
+   "6": 0.0807,
+   "7": 0.065,
+   "8": 0.0513,
+   "9": 0.0412,
+   "10": 0.032,
+   "11": 0.0254,
+   "12": 0.0203,
+   "13": 0.016,
+   "14": 0.0128,
+   "15": 0.0104,
+   "16": 0.0082
+  },
+  "exactSecondWinsSet": 0.565738511508127
+ }
+}

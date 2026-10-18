@@ -1,0 +1,73 @@
+{
+  "_readme": "Every modelling assumption lives here. Edit freely; the engine and the web interface read these as defaults. Each block has a _why explaining the choice and what would replace it with better data.",
+  "colour": {
+    "_why": "How a shirt becomes a card colour. rule 'dominant' is the original game: each card has ONE colour, the colour family covering most of the shirt (body 70%, sleeves 15% each, stripes measured from pattern images). If two colours are within tie_tolerance of each other, the one earlier in tie_priority wins (chromatic colours before white/black/grey). rule 'all' is a variant where every colour covering at least min_share of the shirt counts. 'basic' scheme merges navy/sky into blue and claret into red; 'detailed' keeps them apart.",
+    "rule": "dominant",
+    "scheme": "basic",
+    "tie_tolerance": 0.05,
+    "tie_priority": [
+      "red",
+      "blue",
+      "green",
+      "yellow",
+      "orange",
+      "purple",
+      "pink",
+      "claret",
+      "navy",
+      "sky",
+      "brown",
+      "black",
+      "grey",
+      "white"
+    ],
+    "min_share": 0.12
+  },
+  "kit_usage": {
+    "_why": "Share of a team's matches played in each kit. No global per-match kit database exists, so this is an ESTIMATE: home kit = all home games + away games without a colour clash; away = clashes; third = double clashes and promotional games. Replace with real counts per team in data/overrides/kit_usage_overrides.json when available (e.g. World Cup match pages list kits worn).",
+    "home": 0.68,
+    "away": 0.24,
+    "third": 0.08,
+    "missing_kit": "renormalise"
+  },
+  "matches_per_season": {
+    "_why": "How many matches a team plays per season; scales how often its shirts are seen. Club figures = league games + typical cups by league level; national teams play ~10 a year.",
+    "club_level": {
+      "1": 46,
+      "2": 48,
+      "3": 44,
+      "4": 42,
+      "default": 38
+    },
+    "national": 10
+  },
+  "popularity": {
+    "_why": "Card decks over-represent famous teams. Popularity = number of Wikipedia language editions with an article on the team (Wikidata sitelinks), a proxy for global fame. weight = matches x popularity^exponent. Turn off for a 'whole football world' deck.",
+    "enabled": true,
+    "metric": "sitelinks",
+    "exponent": 1.0,
+    "top_n": 300
+  },
+  "deck_population": {
+    "_why": "Which teams can appear on cards.",
+    "clubs": true,
+    "national": true,
+    "women": false,
+    "youth_other": false,
+    "non_fifa_national": false,
+    "confederations": [
+      "UEFA",
+      "CONMEBOL",
+      "CONCACAF",
+      "CAF",
+      "AFC",
+      "OFC"
+    ]
+  },
+  "game": {
+    "_why": "Rules as described: 2 players, deck split evenly, reorder only between sets, winner of a set starts the next one, match = at least one shared shirt colour, you lose when you must play and have no cards.",
+    "players": 2,
+    "deck_size": 40,
+    "max_sets": 3000
+  }
+}

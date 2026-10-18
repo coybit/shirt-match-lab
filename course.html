@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Shirt Match Academy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a textbook — chapter index on the left, one chapter at a time in a reading column, widgets as "lab benches" breaking out wider */
+:root{
+  --paper:#f5f6f0; --card:#ffffff; --ink:#15212b; --muted:#5a6670; --line:#d8dcd2;
+  --accent:#0d7a49; --accent-ink:#ffffff; --flag:#e3b100; --bad:#c2372f; --good:#0d7a49;
+  --grid:rgba(21,33,43,.08); --bench:#eef1ea;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-ui:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e1613; --card:#16201c; --ink:#e6ede8; --muted:#93a39a; --line:#26342e;
+  --accent:#3cc47f; --accent-ink:#06120c; --flag:#f0c419; --bad:#ef6a5f; --good:#3cc47f; --grid:rgba(230,237,232,.08); --bench:#121c18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1613; --card:#16201c; --ink:#e6ede8; --muted:#93a39a; --line:#26342e;
+  --accent:#3cc47f; --accent-ink:#06120c; --flag:#f0c419; --bad:#ef6a5f; --good:#3cc47f; --grid:rgba(230,237,232,.08); --bench:#121c18; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:17px/1.6 var(--f-body);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+a{color:var(--accent)}
+.shell{display:grid;grid-template-columns:280px minmax(0,1fr);gap:32px;max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}}
+aside{position:sticky;top:16px;align-self:start;max-height:calc(100vh - 32px);overflow:auto;font-family:var(--f-ui)}
+@media (max-width:900px){aside{position:static;max-height:none}}
+.brand{font:800 34px/.95 var(--f-display);text-transform:uppercase;margin:0 0 4px}
+.brand span{color:var(--accent)}
+.sub{font:14px/1.4 var(--f-ui);color:var(--muted);margin:0 0 14px}
+.progress{height:8px;background:var(--grid);border-radius:4px;overflow:hidden;margin:6px 0 4px}
+.progress div{height:100%;background:var(--accent);width:0}
+.toc{display:grid;gap:2px;margin-top:12px}
+.toc .part{font:700 12px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px}
+.toc button{all:unset;cursor:pointer;display:grid;grid-template-columns:26px 1fr 16px;gap:6px;align-items:baseline;padding:5px 8px;border-radius:6px;font:15px/1.3 var(--f-ui)}
+.toc button:hover{background:var(--grid)}
+.toc button[aria-current="true"]{background:var(--ink);color:var(--paper)}
+.toc .n{font:600 12px var(--f-mono);color:inherit;opacity:.7}
+.toc .tick{color:var(--good);font-weight:700}
+.toc button:focus-visible{outline:3px solid var(--flag)}
+main{min-width:0}
+.eyebrow{font:700 13px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(40px,6vw,64px)/.95 var(--f-display);text-transform:uppercase;margin:6px 0 10px;text-wrap:balance}
+h2{font:800 28px/1.05 var(--f-display);text-transform:uppercase;margin:34px 0 8px;letter-spacing:.01em;text-wrap:balance}
+.lead{font-size:20px;line-height:1.5;color:var(--muted);max-width:62ch}
+.read p,.read li{max-width:66ch}
+.meta{font:14px var(--f-ui);color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.bench{background:var(--bench);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0;font-family:var(--f-ui);font-size:15px;line-height:1.45;min-width:0;display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.bench .lab{font:700 12px var(--f-ui);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.def{border-left:4px solid var(--accent);background:var(--card);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0;max-width:66ch}
+.def b:first-child{font:700 13px var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:block}
+.formula{font:14px/1.5 var(--f-mono);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;white-space:pre-wrap;overflow-x:auto;max-width:66ch}
+.quiz{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:18px 0;font-family:var(--f-ui);font-size:16px;max-width:70ch}
+.quiz .q{font-weight:700;margin-bottom:8px}
+.quiz .opts{display:grid;gap:6px}
+.quiz button.opt{all:unset;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:var(--paper)}
+.quiz button.opt:focus-visible{outline:3px solid var(--flag)}
+.quiz button.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 16%,var(--paper))}
+.quiz button.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,var(--paper))}
+.quiz .why{margin-top:8px;font-size:15px}
+.takeaways{background:var(--ink);color:var(--paper);border-radius:12px;padding:16px 18px;margin:26px 0;font-family:var(--f-ui)}
+.takeaways h3{font:800 20px var(--f-display);text-transform:uppercase;margin:0 0 6px;letter-spacing:.03em}
+.takeaways li{margin:4px 0}
+.more{font:15px var(--f-ui)}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:28px;flex-wrap:wrap}
+.btn{font:700 14px/1 var(--f-ui);letter-spacing:.05em;text-transform:uppercase;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:6px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 13px var(--f-ui);border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+select,input[type=number]{font:15px var(--f-ui);color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{border-top:3px solid var(--ink);padding-top:6px}
+.kpi .v{font:800 30px/1 var(--f-display)}
+.kpi .l{font-size:13px;color:var(--muted)}
+.scroll{overflow-x:auto}
+.small{font-size:13px}.muted{color:var(--muted)}.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+svg text{fill:var(--ink);font-family:var(--f-ui)}
+svg .gridl{stroke:var(--grid)} svg .axis{stroke:var(--line)}
+table.tbl{border-collapse:collapse;font-size:14px}
+table.tbl th,table.tbl td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left}
+.heat td{text-align:center;font:12px var(--f-mono);padding:5px 4px;border:1px solid var(--paper)}
+.heat th{font-size:11px;padding:3px;color:var(--muted)}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--line);vertical-align:middle}
+.tag{font:700 11px var(--f-ui);text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:4px;background:var(--grid)}
+.cardmini{display:inline-grid;justify-items:center;gap:2px;width:64px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--card);font-size:11px;text-align:center}
+.cardmini svg{width:34px;height:34px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside>
+    <p class="brand">Shirt Match <span>Academy</span></p>
+    <p class="sub">Probability, game theory and discrete maths, taught through one childhood card game.</p>
+    <div class="small muted" id="progLabel"></div>
+    <div class="progress"><div id="progBar"></div></div>
+    <nav class="toc" id="toc" aria-label="Chapters"></nav>
+    <p class="small" style="margin-top:16px"><a href="index.html">← Back to Shirt Match Lab</a></p>
+  </aside>
+  <main id="main"><p class="muted">Loading the deck…</p></main>
+</div>
+<script src="engine.js"></script>
+<script>
+(async function(){
+const E = window.Engine;
+const $ = (s, r=document) => r.querySelector(s);
+const h = (tag, attrs={}, ...kids) => { const e=document.createElement(tag); for(const k in attrs){ const v=attrs[k]; if(v==null) continue; if(k==='class') e.className=v; else if(k==='html') e.innerHTML=v; else if(k.startsWith('on')) e.addEventListener(k.slice(2),v); else e.setAttribute(k,v); } for(const c of kids.flat()){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); } return e; };
+const pct = (x,d=0) => (100*x).toFixed(d)+'%';
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const W_ = t => 'https://en.wikipedia.org/wiki/' + t;
+const GS = 'https://math.dartmouth.edu/~prob/prob/prob.pdf';
+
+const [data, cfg, pre] = await Promise.all(['teams.json','assumptions.json','results.json'].map(f=>fetch(f).then(r=>r.json())));
+const pool = E.buildPool(data, cfg);
+const allCfg = JSON.parse(JSON.stringify(cfg)); allCfg.colour.rule='all';
+const poolAll = E.buildPool(data, allCfg);
+const SCH = pool.scheme, NM = E.SCHEMES[SCH];
+const D0 = E.missTable(pool.masks, pool.F);
+const q0 = E.matchProbability(pool);
+const fam = E.familyFrequencies(pool).sort((a,b)=>b.p-a.p);
+const famP = Object.fromEntries(fam.map(f=>[f.name,f.p]));
+const teamIndex = new Map(data.teams.map(t=>[t[0],t]));
+const bitOf = c => 1 << NM.indexOf(c);
+const nameOf = m => E.maskNames(m, SCH).join(' + ');
+
+/* ---------- drawing helpers ---------- */
+let sid=0; const SHIRT='M13 5 L17 3 Q20 6 23 3 L27 5 L36 11 L32 17 L28 14 L28 37 L12 37 L12 14 L8 17 L4 11 Z';
+function shirtFromHex(cols){ const id='s'+(sid++); let x=4,parts=''; const tot=cols.reduce((s,c)=>s+c[1],0)||1; for(const [hex,s] of cols){ const w=32*s/tot; parts+=`<rect x="${x.toFixed(2)}" y="0" width="${(w+0.3).toFixed(2)}" height="40" fill="#${hex}"/>`; x+=w; } return `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="${id}"><path d="${SHIRT}"/></clipPath></defs><g clip-path="url(#${id})">${parts}</g><path d="${SHIRT}" fill="none" stroke="currentColor" stroke-opacity=".45"/></svg>`; }
+function shirtFromMask(m, sch=SCH){ return shirtFromHex(E.maskNames(m,sch).map(c=>[E.SWATCH[c].slice(1),1])); }
+function cardMini(e){ const t=teamIndex.get(e.team), cols=t&&t[10][e.kit]; return h('span',{class:'cardmini',title:e.team,html:(cols?shirtFromHex(cols):shirtFromMask(e.mask))+`<span>${e.team.replace(/ national (association )?football team/i,'').replace(/ F\.C\.$| FC$|^FC /,'').slice(0,14)}</span>`}); }
+function dot(c){ return `<span class="sw" style="background:${E.SWATCH[c]}"></span>`; }
+function barChart(pairs,{h:H=150,fmt=x=>x.toFixed(2),colors}={}){ const W=520,pad=24,bw=(W-pad*2)/pairs.length,mx=Math.max(...pairs.map(p=>p[1]))||1; let s=`<svg viewBox="0 0 ${W} ${H+28}" width="100%">`; s+=`<line class="axis" x1="${pad}" y1="${H}" x2="${W-pad}" y2="${H}"/>`;
+  pairs.forEach(([l,v],i)=>{ const bh=(H-18)*v/mx,x=pad+i*bw; s+=`<rect x="${(x+2).toFixed(1)}" y="${(H-bh).toFixed(1)}" width="${Math.max(1,bw-4).toFixed(1)}" height="${bh.toFixed(1)}" fill="${colors?colors[i]:'var(--accent)'}" stroke="${colors?'var(--line)':'none'}" rx="2"/><text x="${(x+bw/2).toFixed(1)}" y="${H+14}" text-anchor="middle" font-size="11">${l}</text>`; if(v/mx>0.1&&bw>18) s+=`<text x="${(x+bw/2).toFixed(1)}" y="${(H-bh-4).toFixed(1)}" text-anchor="middle" font-size="10" style="fill:var(--muted)">${fmt(v)}</text>`; });
+  return h('div',{class:'scroll',html:s+'</svg>'}); }
+function lineChart(series,{h:H=180,ymin=0,ymax=1,xlabel='',ylabel='',yfmt=v=>v,xmin,xmax}={}){ const W=520,L=44,Rr=12,T=10,B=26; const xs=series.flatMap(s=>s.pts.map(p=>p[0])); const x0=xmin??Math.min(...xs), x1=xmax??(Math.max(...xs)||1);
+  const X=x=>L+(W-L-Rr)*(x-x0)/((x1-x0)||1), Y=y=>T+(H-T-B)*(1-(y-ymin)/((ymax-ymin)||1)); let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  for(let k=0;k<=4;k++){ const yv=ymin+(ymax-ymin)*k/4; s+=`<line class="gridl" x1="${L}" x2="${W-Rr}" y1="${Y(yv)}" y2="${Y(yv)}"/><text x="${L-6}" y="${Y(yv)+4}" text-anchor="end" font-size="10" style="fill:var(--muted)">${yfmt(+yv.toFixed(3))}</text>`; }
+  s+=`<text x="${W-Rr}" y="${H-5}" text-anchor="end" font-size="11" style="fill:var(--muted)">${xlabel}: ${+(+x0).toFixed(2)} → ${+(+x1).toFixed(2)}</text><text x="${L+6}" y="${T+10}" font-size="11" style="fill:var(--muted)">${ylabel}</text>`;
+  for(const sr of series){ if(sr.dots){ for(const p of sr.pts) s+=`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${sr.r||3}" fill="${sr.color}"/>`; continue; } s+=`<polyline fill="none" stroke="${sr.color}" stroke-width="${sr.w||2}" ${sr.dash?'stroke-dasharray="5 4"':''} points="${sr.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}"/>`; }
+  const leg=series.filter(s=>s.label).map(s=>`<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px"><span style="width:14px;height:3px;background:${s.color};display:inline-block"></span>${s.label}</span>`).join('');
+  return h('div',{class:'scroll',html:s+'</svg>'+(leg?`<div class="small">${leg}</div>`:'')}); }
+function slider(label,{min,max,step,value,fmt=v=>v,id},on){ const out=h('span',{class:'mono small'}); const inp=h('input',{type:'range',min,max,step,value,id,'aria-label':label}); const upd=()=>{out.textContent=fmt(+inp.value);}; inp.addEventListener('input',()=>{upd();on(+inp.value);}); upd(); return [h('div',{},h('label',{class:'row small'},label,out),inp),inp]; }
+const sampler = E.sampler(pool);
+const typesTop = n => [...pool.masks].sort((a,b)=>b[1]-a[1]).slice(0,n);
+
+/* ---------- progress (per viewer) ---------- */
+const KEY='sma-progress-v1'; let prog={}; try{ prog=JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ prog={}; }
+const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(prog)); }catch(e){} };
+
+/* ---------- widgets ---------- */
+const WG = {};
+
+WG.lln = (el) => { // law of large numbers
+  let counts = {}, total = 0, hist = []; const R = E.rng(17); const target = fam[0].name;
+  const out = h('div'); const row = h('div',{class:'chips'});
+  const draw = n => { for(let i=0;i<n;i++){ const e=sampler(R); const c=NM.find((_,j)=>e.mask>>j&1); counts[c]=(counts[c]||0)+1; total++; if(total<=200||total%10===0) hist.push([total,(counts[target]||0)/total]); } render(); };
+  [1,10,100,1000].forEach(n=>row.append(h('button',{class:'chip',onclick:()=>draw(n)},'Draw '+n)));
+  row.append(h('button',{class:'chip',onclick:()=>{counts={};total=0;hist=[];render();}},'Reset'));
+  const render = () => { out.innerHTML=''; if(!total){ out.append(h('p',{class:'muted'},'Draw some cards to start.')); return; }
+    out.append(lineChart([{pts:hist,color:css('--accent'),label:`share of ${target} cards so far`},{pts:[[1,famP[target]],[Math.max(2,total),famP[target]]],color:css('--flag'),dash:true,label:`true probability ${pct(famP[target],1)}`}],{h:170,ymin:0,ymax:Math.min(1,Math.max(0.6,famP[target]*2)),xlabel:'cards drawn',ylabel:'share',yfmt:v=>pct(v),xmin:1}));
+    const cols=fam.filter(f=>f.p>0.009); out.append(h('div',{class:'small',html:`After <b>${total}</b> cards: `+cols.map(f=>`${dot(f.name)} ${f.name} ${pct((counts[f.name]||0)/total)} <span class="muted">(true ${pct(f.p)})</span>`).join(' · ')})); };
+  el.append(row,out); render();
+};
+
+WG.sigma = (el) => { // P(match) = sum p^2
+  const cols=['white','red','blue','black']; const w=[0.35,0.2,0.19,0.11]; const out=h('div');
+  const sl=cols.map((c,i)=>slider(c,{min:0,max:1,step:0.01,value:w[i],id:'sg'+i,fmt:v=>v.toFixed(2)},v=>{w[i]=v;draw();})[0]);
+  const draw=()=>{ const t=w.reduce((a,b)=>a+b,0)||1, p=w.map(x=>x/t), q=p.reduce((a,x)=>a+x*x,0);
+    let s=`<svg viewBox="0 0 520 70" width="100%">`; let x=10; p.forEach((pi,i)=>{ const ww=500*pi; s+=`<rect x="${x}" y="8" width="${ww}" height="22" fill="${E.SWATCH[cols[i]]}" stroke="var(--line)"/><rect x="${x}" y="38" width="${500*pi*pi}" height="22" fill="${E.SWATCH[cols[i]]}" stroke="var(--ink)"/>`; x+=ww; }); s+=`<text x="10" y="6" font-size="9" style="fill:var(--muted)"></text></svg>`;
+    out.innerHTML=''; out.append(h('div',{class:'small muted'},'Top bar: share of each colour (p). Bottom bar: p², the chance that both cards are that colour.'),h('div',{html:s}),
+      h('div',{class:'kpis'},h('div',{class:'kpi'},h('div',{class:'v'},pct(q,1)),h('div',{class:'l'},'P(match) = Σp²')),h('div',{class:'kpi'},h('div',{class:'v'},(1/q).toFixed(2)),h('div',{class:'l'},'behaves like this many equal colours')),h('div',{class:'kpi'},h('div',{class:'v'},pct(1/cols.length,0)),h('div',{class:'l'},'lowest possible with 4 colours (all equal)'))),
+      h('p',{class:'small',html:`The real deck of famous teams has P(match) = <b>${pct(q0,1)}</b>.`})); };
+  el.append(h('div',{style:'display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))'},...sl),out); draw();
+};
+
+WG.cond = (el) => {
+  const tt=typesTop(8); const sel=(id,def)=>{ const s=h('select',{id}); tt.forEach(([m,p])=>s.append(h('option',{value:m},nameOf(m)+' ('+pct(p)+')'))); s.value=String(def); return s; };
+  const a1=sel('cd1',tt[0][0]), a2=sel('cd2',tt[0][0]); const out=h('div');
+  const draw=()=>{ const x=+a1.value,y=+a2.value, p1=1-D0[x], miss=D0[x], p2=miss>0?(D0[x]-D0[x|y])/miss:0;
+    out.innerHTML=`<svg viewBox="0 0 470 210" width="100%" style="max-width:520px"><defs><marker id="ca" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+      <rect x="4" y="86" width="104" height="40" rx="6" fill="var(--card)" stroke="var(--ink)"/><text x="56" y="103" text-anchor="middle" font-size="11">their card meets</text><text x="56" y="118" text-anchor="middle" font-size="11" font-weight="700">your 1st (${nameOf(x)})</text>
+      <path d="M108 100 L176 44" stroke="var(--muted)" stroke-width="2" marker-end="url(#ca)"/><path d="M108 112 L176 160" stroke="var(--muted)" stroke-width="2" marker-end="url(#ca)"/>
+      <text x="128" y="62" font-size="12" font-weight="700" style="fill:var(--bad)">${pct(p1)}</text><text x="128" y="156" font-size="12" font-weight="700" style="fill:var(--good)">${pct(miss)}</text>
+      <rect x="178" y="24" width="112" height="36" rx="6" fill="color-mix(in srgb,var(--bad) 15%,transparent)" stroke="var(--bad)"/><text x="234" y="46" text-anchor="middle" font-size="11">they take the pile</text>
+      <rect x="178" y="142" width="112" height="40" rx="6" fill="var(--card)" stroke="var(--ink)"/><text x="234" y="159" text-anchor="middle" font-size="11">it missed; now your</text><text x="234" y="174" text-anchor="middle" font-size="11" font-weight="700">2nd (${nameOf(y)})</text>
+      <path d="M290 156 L358 116" stroke="var(--muted)" stroke-width="2" marker-end="url(#ca)"/><path d="M290 168 L358 198" stroke="var(--muted)" stroke-width="2" marker-end="url(#ca)"/>
+      <text x="306" y="126" font-size="12" font-weight="700" style="fill:var(--good)">${pct(p2)}</text><text x="306" y="204" font-size="12" font-weight="700" style="fill:var(--muted)">${pct(1-p2)}</text>
+      <rect x="360" y="98" width="100" height="32" rx="6" fill="color-mix(in srgb,var(--good) 15%,transparent)" stroke="var(--good)"/><text x="410" y="118" text-anchor="middle" font-size="11">you take the pile</text>
+      <rect x="360" y="184" width="100" height="24" rx="6" fill="none" stroke="var(--line)"/><text x="410" y="200" text-anchor="middle" font-size="11">set goes on</text></svg>`;
+    out.append(h('p',{class:'small',html:`On its own, your 2nd card would match ${pct(1-D0[y])} of cards. <b>Given</b> that their card missed your 1st, it matches ${pct(p2)}. ${p2<0.01?'<b>Zero.</b> Repeating a colour is a wasted attack.':'The condition changes the odds.'}`})); };
+  a1.onchange=draw; a2.onchange=draw; el.append(h('div',{class:'chips'},h('label',{},'1st card ',a1),h('label',{},'2nd card ',a2)),out); draw();
+};
+
+WG.expect = (el) => { // simulate set swing distribution
+  let seed=3; const out=h('div'); const mode=h('select',{id:'exm'},h('option',{value:'random'},'Random order'),h('option',{value:'zigzag'},'Shield + zig-zag order')); const btn=h('button',{class:'chip',onclick:()=>{seed++;run();}},'New hand');
+  const run=()=>{ const R=E.rng(seed), hand=Array.from({length:10},(_,i)=>({id:i,mask:sampler(R).mask})); const order=E.STRATEGIES[mode.value].fn({hand,starter:true,oppLen:20,popD:D0,countD:D0,F:pool.F,R:E.rng(5)}).map(c=>c.mask);
+    const R2=E.rng(seed*7+1), N=4000, vals={}; let sum=0;
+    for(let t=0;t<N;t++){ let my=0,op=0,prev=-1,turn=0,res=0; for(let g=0;g<200;g++){ let m; if(turn===0){ if(my>=order.length){res=-my;break;} m=order[my++]; } else { m=sampler(R2).mask; op++; } if(prev>=0&&(m&prev)){ res=turn===0?op:-my; break; } prev=m; turn^=1; } vals[res]=(vals[res]||0)+1; sum+=res; }
+    const ex=E.setOutcome(order,D0,true,20); const keys=Object.keys(vals).map(Number).sort((a,b)=>a-b).filter(k=>k>=-8&&k<=8);
+    out.innerHTML=''; out.append(h('div',{class:'small',html:'Your order: '+order.map(m=>shirtFromMask(m).replace('<svg','<svg width="22" height="22"')).join('')}),
+      barChart(keys.map(k=>[(k>0?'+':'')+k,vals[k]/N]),{h:130,fmt:x=>pct(x),colors:keys.map(k=>k>0?css('--good'):css('--bad'))}),
+      h('div',{class:'kpis'},h('div',{class:'kpi'},h('div',{class:'v'},(sum/N>=0?'+':'')+(sum/N).toFixed(2)),h('div',{class:'l'},`average of ${N} simulated sets`)),h('div',{class:'kpi'},h('div',{class:'v'},(ex.swing>=0?'+':'')+ex.swing.toFixed(2)),h('div',{class:'l'},'exact expected value (formula)')),h('div',{class:'kpi'},h('div',{class:'v'},pct(ex.win)),h('div',{class:'l'},'chance to win the set')))); };
+  mode.onchange=run; el.append(h('div',{class:'chips'},mode,btn),out); run();
+};
+
+WG.geo = (el) => { const out=h('div'); const [s]=slider('match chance per comparison q',{min:0.05,max:0.9,step:0.01,value:q0.toFixed(2),id:'gq',fmt:v=>pct(v)},v=>draw(v));
+  const pe=E.setLengthLaw(pool,30);
+  const draw=q=>{ const pts=[]; for(let k=1;k<=12;k++) pts.push([String(k),(1-q)**(k-1)*q]); out.innerHTML=''; out.append(barChart(pts,{h:130,fmt:x=>pct(x)}),h('p',{class:'small',html:`Mean wait: <b>1/q = ${(1/q).toFixed(2)}</b> comparisons. The real game’s first comparison matches ${pct(pe[2])}, and the real mean set lasts ${pe.reduce((a,p,L)=>a+p*L,0).toFixed(1)} cards.`})); };
+  el.append(s,out); draw(+q0.toFixed(2)); };
+
+WG.poisson = (el) => { const sel=h('select',{id:'pc'}); fam.filter(f=>f.p>0.003).forEach(f=>sel.append(h('option',{value:f.name},f.name+' ('+pct(f.p,1)+')'))); sel.value=fam.find(f=>f.name==='green')?'green':fam[3].name; const out=h('div');
+  const fact=k=>{let r=1;for(let i=2;i<=k;i++)r*=i;return r;}, C=(n,k)=>{let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r;};
+  const draw=()=>{ const p=famP[sel.value], n=20, lam=n*p; const R=E.rng(9); const sim=new Array(21).fill(0); const T=6000; const b=bitOf(sel.value); for(let t=0;t<T;t++){ let c=0; for(let i=0;i<n;i++) if(sampler(R).mask&b) c++; sim[c]++; }
+    const K=Math.min(12,Math.ceil(lam+3*Math.sqrt(lam)+2)); const pts=[]; for(let k=0;k<=K;k++) pts.push([k,sim[k]/T]);
+    out.innerHTML=''; out.append(lineChart([{pts,color:css('--accent'),dots:true,r:5,label:'simulated hands'},{pts:[...Array(K+1).keys()].map(k=>[k,C(n,k)*p**k*(1-p)**(n-k)]),color:css('--ink'),label:'Binomial(20, p)'},{pts:[...Array(K+1).keys()].map(k=>[k,Math.exp(-lam)*lam**k/fact(k)]),color:css('--flag'),dash:true,label:'Poisson(20p)'}],{h:180,ymin:0,ymax:Math.max(...pts.map(p=>p[1]))*1.15,xlabel:'cards of this colour in your 20-card hand',ylabel:'probability',yfmt:v=>pct(v)})); };
+  sel.onchange=draw; el.append(h('label',{},'Colour ',sel),out); draw(); };
+
+WG.clt = (el) => { const out=h('div'); const [s]=slider('number of comparisons n',{min:1,max:200,step:1,value:20,id:'cn'},v=>draw(v));
+  const draw=n=>{ const q=q0, R=E.rng(n*13+1), T=4000, cnt=new Array(n+1).fill(0); for(let t=0;t<T;t++){ let c=0; for(let i=0;i<n;i++) if(R()<q) c++; cnt[c]++; }
+    const mu=n*q, sd=Math.sqrt(n*q*(1-q)); const lo=Math.max(0,Math.floor(mu-4*sd)), hi=Math.min(n,Math.ceil(mu+4*sd)); const pts=[], nor=[];
+    for(let k=lo;k<=hi;k++){ pts.push([k,cnt[k]/T]); nor.push([k,Math.exp(-((k-mu)**2)/(2*sd*sd))/(sd*Math.sqrt(2*Math.PI))]); }
+    out.innerHTML=''; out.append(lineChart([{pts,color:css('--accent'),dots:true,r:4,label:'simulated: matches in n comparisons'},{pts:nor,color:css('--flag'),label:'normal curve (mean nq, sd √(nq(1−q)))'}],{h:180,ymin:0,ymax:Math.max(...pts.map(p=>p[1]),...nor.map(p=>p[1]))*1.1,xlabel:'number of matches',ylabel:'probability',yfmt:v=>pct(v)}),
+      h('p',{class:'small',html:`n = ${n}: mean ${mu.toFixed(1)}, standard deviation ${sd.toFixed(2)}. Slide n up and the dots hug the bell curve more and more closely.`})); };
+  el.append(s,out); draw(20); };
+
+WG.markov = (el) => { const types=['white','red','blue','black']; const w=types.map(c=>famP[c]||0.05); const out=h('div');
+  const sl=types.map((c,i)=>slider(c,{min:0,max:1,step:0.01,value:w[i].toFixed(2),id:'mk'+i,fmt:v=>v.toFixed(2)},v=>{w[i]=v;draw();})[0]);
+  const draw=()=>{ const t=w.reduce((a,b)=>a+b,0)||1, p=w.map(x=>x/t); const masks=new Map(); types.forEach((c,i)=>masks.set(bitOf(c),p[i])); const toy={masks,F:pool.F,scheme:SCH}; const pe=E.setLengthLaw(toy,60);
+    const second=pe.reduce((s,x,L)=>s+(L%2===0?x:0),0); const mean=pe.reduce((s,x,L)=>s+x*L,0);
+    const mt=h('table',{class:'heat'}); mt.append(h('tr',{},h('th',{},'last card \\ next'),...types.map(c=>h('th',{html:dot(c)+' '+c})),h('th',{},'= match, set ends')));
+    types.forEach((c,i)=>{ const tr=h('tr',{},h('th',{html:dot(c)+' '+c})); types.forEach((d,j)=>{ const v=i===j?0:p[j]; tr.append(h('td',{style:`background:color-mix(in srgb,var(--accent) ${(v*90).toFixed(0)}%,transparent)`},v.toFixed(2))); }); tr.append(h('td',{style:`background:color-mix(in srgb,var(--bad) ${(p[i]*90).toFixed(0)}%,transparent)`},p[i].toFixed(2))); mt.append(tr); });
+    out.innerHTML=''; out.append(h('div',{class:'scroll'},mt),h('div',{class:'kpis'},h('div',{class:'kpi'},h('div',{class:'v'},pct(second)),h('div',{class:'l'},'of sets won by the player who went second')),h('div',{class:'kpi'},h('div',{class:'v'},mean.toFixed(1)),h('div',{class:'l'},'cards per set on average'))),
+      barChart(pe.slice(2,14).map((v,i)=>[String(i+2),v]),{h:110,fmt:x=>pct(x)}),h('p',{class:'small muted'},'Bars: chance the set ends on card 2, 3, 4… Even numbers are wins for the second player.')); };
+  el.append(h('div',{style:'display:grid;gap:6px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))'},...sl),out); draw(); };
+
+WG.ruin = (el) => { const N=20; const out=h('div'); const btn=h('button',{class:'chip'},'Run 600 games');
+  const run=()=>{ const R=E.rng((Math.random()*1e9)|0), o={R,F:pool.F,popD:D0,popDist:pool.masks,maxSets:3000}; const ks=[2,4,6,8,10,12,14,16,18]; const pts=[];
+    for(const k of ks){ let win=0; const G=Math.round(600/ks.length);
+      for(let g=0;g<G;g++){ const deck=Array.from({length:N},()=>sampler(R).mask); // give A exactly k cards by dealing unevenly
+        const cards=deck.map((m,id)=>({id,mask:m})); const hands=[cards.slice(0,k),cards.slice(k)]; let starter=R()<0.5?0:1, sets=0, done=-1;
+        while(sets++<3000&&done<0){ E.shuffle(hands[0],R); E.shuffle(hands[1],R); const pile=[]; let turn=starter, prev=-1;
+          while(true){ if(!hands[turn].length){ done=1-turn; break; } const c=hands[turn].shift(); pile.push(c); if(prev>=0&&(c.mask&prev)){ hands[turn].push(...pile); starter=turn; if(!hands[1-turn].length) done=turn; break; } prev=c.mask; turn^=1; } }
+        if(done===0) win++; }
+      pts.push([k,win/G]); }
+    out.innerHTML=''; out.append(lineChart([{pts:[[0,0],[N,1]],color:css('--flag'),dash:true,label:'k / N (gambler’s ruin prediction)'},{pts,color:css('--accent'),dots:true,r:5,label:'simulated win rate'}],{h:190,ymin:0,ymax:1,xmin:0,xmax:N,xlabel:'cards A starts with (out of 20)',ylabel:'P(A wins)',yfmt:v=>pct(v)})); };
+  btn.onclick=run; el.append(btn,out); run(); };
+
+WG.duration = (el) => { const out=h('div'); const [s]=slider('deck size N',{min:10,max:80,step:2,value:40,id:'dn'},v=>draw(v)); const pe=E.setLengthLaw(pool,60);
+  const draw=N=>{ const ch=E.cardChain(pe,N); out.innerHTML=''; out.append(lineChart([{pts:ch.map(r=>[r.k,r.setsIfStarter]),color:css('--accent'),label:'expected sets left (exact, absorbing chain)'}],{h:170,ymin:0,ymax:Math.max(...ch.map(r=>r.setsIfStarter))*1.08,xlabel:'A’s cards k',ylabel:'sets',yfmt:v=>Math.round(v)}),
+    h('p',{class:'small',html:`Even split of ${N} cards: about <b>${Math.round(ch[N/2-1].setsIfStarter)}</b> sets. The curve is a hump shaped like k(N−k). Doubling N roughly quadruples the length.`})); };
+  el.append(s,out); draw(40); };
+
+WG.duel = (el) => { // play 2 strategies quickly
+  const SN=Object.keys(E.STRATEGIES); const sa=h('select',{id:'da'}), sb=h('select',{id:'db'}); SN.forEach(n=>{ sa.append(h('option',{value:n},E.STRATEGIES[n].label)); sb.append(h('option',{value:n},E.STRATEGIES[n].label)); }); sa.value='zigzag'; sb.value='random'; const out=h('div');
+  const btn=h('button',{class:'chip',onclick:()=>{ const R=E.rng((Math.random()*1e9)|0), mk=E.makeDeckFactory(pool,20), o={R,F:pool.F,popD:D0,popDist:pool.masks,maxSets:600,scheme:SCH}; let w=0,d=0; const G=200; for(let g=0;g<G;g++){ const r=E.playGame(mk(R),sa.value,sb.value,o); if(r.winner===0) w++; else if(r.winner<0) d++; } const wr=(w+d/2)/G, se=Math.sqrt(wr*(1-wr)/G);
+    out.innerHTML=''; out.append(h('p',{html:`<b>${E.STRATEGIES[sa.value].label}</b> won <b>${pct(wr)}</b> of 200 games (±${pct(1.96*se)}) against ${E.STRATEGIES[sb.value].label}.${d?` ${d} games were draws.`:''}`})); }},'Play 200 games');
+  el.append(h('div',{class:'chips'},h('label',{},'A ',sa),h('label',{},'B ',sb),btn),out); };
+
+WG.payoff = (el) => { const T=pre.tournament, n=T.names.length, avg=T.winRate.map(r=>r.reduce((a,b)=>a+b,0)/n), order=T.names.map((_,i)=>i).sort((a,b)=>avg[b]-avg[a]);
+  const tbl=h('table',{class:'heat'}); tbl.append(h('tr',{},h('th',{},'row vs column'),...order.map(j=>h('th',{title:E.STRATEGIES[T.names[j]].label},String(order.indexOf(j)+1)))));
+  order.forEach((i,ri)=>{ const tr=h('tr',{},h('th',{style:'text-align:left'},(ri+1)+'. '+E.STRATEGIES[T.names[i]].label)); order.forEach(j=>{ const v=T.winRate[i][j]; const col=v>=0.5?css('--good'):css('--bad'); tr.append(h('td',{style:`background:color-mix(in srgb,${col} ${(Math.min(1,Math.abs(v-0.5)*2.4)*85).toFixed(0)}%,transparent)`},i===j?'·':(100*v).toFixed(0))); }); tbl.append(tr); });
+  const dom=[]; for(const i of order) for(const j of order) if(i!==j && T.names.every((_,k)=>k===i||k===j||T.winRate[i][k]>=T.winRate[j][k])) dom.push([i,j]);
+  el.append(h('div',{class:'scroll'},tbl),h('p',{class:'small',html:`Each number is the % of games the row strategy wins against the column (${T.meta.games} games per cell). ${dom.length?`Example of dominance: <b>${E.STRATEGIES[T.names[dom[0][0]]].label}</b> does at least as well as <b>${E.STRATEGIES[T.names[dom[0][1]]].label}</b> against every opponent.`:''}`})); };
+
+WG.pennies = (el) => { // matching pennies duel
+  let hist=[], me=0, cpu=0; const out=h('div'); const log=h('div',{class:'small mono',style:'word-break:break-all'});
+  const predict=()=>{ if(hist.length<2) return Math.random()<0.5?'red':'blue'; const last2=hist.slice(-2).join(','); const cnt={red:0,blue:0}; for(let i=2;i<hist.length;i++) if(hist.slice(i-2,i).join(',')===last2) cnt[hist[i]]++; if(cnt.red===cnt.blue){ const r=hist.filter(x=>x==='red').length; return r*2===hist.length?(Math.random()<0.5?'red':'blue'):(r*2>hist.length?'red':'blue'); } return cnt.red>cnt.blue?'red':'blue'; };
+  const play=c=>{ const g=predict(); hist.push(c); if(g===c) cpu++; else me++; render(g,c); };
+  const render=(g,c)=>{ out.innerHTML=''; const n=me+cpu; out.append(h('div',{class:'kpis'},h('div',{class:'kpi'},h('div',{class:'v',style:'color:var(--accent)'},String(me)),h('div',{class:'l'},'you: no match')),h('div',{class:'kpi'},h('div',{class:'v',style:'color:var(--flag)'},String(cpu)),h('div',{class:'l'},'computer: match')),h('div',{class:'kpi'},h('div',{class:'v'},n?pct(me/n):'–'),h('div',{class:'l'},'your share of rounds'))));
+    if(g) out.append(h('p',{html:`You laid ${dot(c)} <b>${c}</b>, the computer answered ${dot(g)} <b>${g}</b>: ${g===c?'<b style="color:var(--bad)">match, computer takes it</b>':'<b style="color:var(--good)">no match, you survive</b>'}.`}));
+    log.textContent=hist.map(x=>x==='red'?'R':'B').join(''); };
+  const rb=h('button',{class:'btn',style:`background:${E.SWATCH.red};border-color:${E.SWATCH.red}`,onclick:()=>play('red')},'Lay red'), bb=h('button',{class:'btn',style:`background:${E.SWATCH.blue};border-color:${E.SWATCH.blue}`,onclick:()=>play('blue')},'Lay blue');
+  const auto=h('button',{class:'btn ghost',onclick:()=>{ for(let i=0;i<100;i++) play(Math.random()<0.5?'red':'blue'); }},'Play 100 truly random');
+  const reset=h('button',{class:'btn ghost',onclick:()=>{hist=[];me=0;cpu=0;render();}},'Reset');
+  el.append(h('p',{class:'small'},'You open the set and want NO match. The computer answers and wants a match. It watches your past choices and predicts your next one.'),h('div',{class:'chips'},rb,bb,auto,reset),out,h('div',{class:'small muted'},'Your sequence so far (R = red, B = blue):'),log); render(); };
+
+WG.mixed = (el) => { // 2x2 asymmetric pennies, graphical solution
+  const out=h('div'); let a=0.5,b=0.5;
+  const [sa]=slider('Pile value if the computer matches on red',{min:0.1,max:3,step:0.1,value:1,id:'mxa',fmt:v=>v.toFixed(1)+' cards'},v=>{a=v;draw();}); const [sb]=slider('Pile value if it matches on blue',{min:0.1,max:3,step:0.1,value:2,id:'mxb',fmt:v=>v.toFixed(1)+' cards'},v=>{b=v;draw();});
+  const draw=()=>{ // opener plays red with prob x. responder red: loss a*x ; responder blue: loss b*(1-x)
+    const xs=[0,1]; const red=xs.map(x=>[x,a*x]), blue=xs.map(x=>[x,b*(1-x)]); const xstar=b/(a+b), v=a*b/(a+b);
+    out.innerHTML=''; out.append(lineChart([{pts:red,color:E.SWATCH.red,w:3,label:'computer answers red: your expected loss'},{pts:blue,color:E.SWATCH.blue,w:3,label:'computer answers blue'},{pts:[[xstar,0],[xstar,v]],color:css('--ink'),dash:true,label:'equilibrium'}],{h:190,ymin:0,ymax:Math.max(a,b)*1.05,xmin:0,xmax:1,xlabel:'how often you open with red',ylabel:'cards you expect to lose',yfmt:v=>v.toFixed(1)}),
+      h('p',{class:'small',html:`The computer will always pick the line that hurts you more, so you sit on the <b>upper</b> envelope. Its lowest point is where the lines cross: open with red <b>${pct(xstar)}</b> of the time. Then you lose <b>${v.toFixed(2)}</b> cards on average, whatever the computer does. That’s the <b>minimax</b> strategy. Notice you play the <i>expensive</i> colour less often.`})); };
+  el.append(sa,sb,out); draw(); };
+
+WG.fictitious = (el) => { const T=pre.tournament, n=T.names.length, A=T.winRate.map(r=>r.map(x=>x-0.5)); const out=h('div'); const [s]=slider('rounds of fictitious play',{min:1,max:3000,step:1,value:3000,id:'fp'},v=>draw(v));
+  const draw=it=>{ const cnt=new Array(n).fill(0), pay=new Array(n).fill(0); for(let t=0;t<it;t++){ let best=0; for(let i=1;i<n;i++) if(pay[i]>pay[best]) best=i; cnt[best]++; for(let i=0;i<n;i++) pay[i]+=A[i][best]; }
+    const mix=cnt.map(c=>c/it); const ord=T.names.map((_,i)=>i).sort((a,b)=>mix[b]-mix[a]).filter(i=>mix[i]>0.004).slice(0,6);
+    out.innerHTML=''; out.append(barChart(ord.map(i=>[E.STRATEGIES[T.names[i]].label.replace(' + optimiser','').slice(0,13),mix[i]]),{h:130,fmt:x=>pct(x)}),h('p',{class:'small',html:`After ${it} rounds, each player has played the best reply to the other’s history. The share of rounds each strategy was chosen approximates the equilibrium mix. ${mix[ord[0]]>0.9?'Here one strategy takes over: it’s the best reply to everything.':'No single strategy takes over, so the equilibrium is a mix.'}`})); };
+  el.append(s,out); draw(3000); };
+
+WG.bayes = (el) => { const R=E.rng(77); const opp=Array.from({length:20},()=>sampler(R).mask); const out=h('div'); const [s]=slider('opponent cards you have seen',{min:0,max:20,step:1,value:0,id:'by'},v=>draw(v));
+  const draw=k=>{ const post={}; NM.forEach(c=>post[c]=famP[c]*(20-k)/20); opp.slice(0,k).forEach(m=>{ const c=NM.find((_,j)=>m>>j&1); post[c]+=1/20; });
+    const cols=fam.filter(f=>f.p>0.009).map(f=>f.name); let Hp=0,Hq=0; NM.forEach(c=>{ if(post[c]>0) Hq-=post[c]*Math.log2(post[c]); if(famP[c]>0) Hp-=famP[c]*Math.log2(famP[c]); });
+    out.innerHTML=''; out.append(h('div',{class:'small',html:'Their hand (seen cards face up): '+opp.map((m,i)=>i<k?shirtFromMask(m).replace('<svg','<svg width="20" height="20"'):'<span style="display:inline-block;width:14px;height:20px;margin:0 3px;border-radius:3px;background:repeating-linear-gradient(45deg,var(--line) 0 3px,var(--card) 3px 6px);border:1px solid var(--muted)"></span>').join('')}),
+      lineChart([{pts:cols.map((c,i)=>[i,famP[c]]),color:css('--muted'),dots:true,r:5,label:'before (prior): average football'},{pts:cols.map((c,i)=>[i,post[c]]),color:css('--accent'),dots:true,r:5,label:'after seeing '+k+' cards (posterior)'}],{h:170,ymin:0,ymax:Math.max(...cols.map(c=>Math.max(post[c],famP[c])))*1.1,xmin:-0.5,xmax:cols.length-0.5,xlabel:cols.join(' · '),ylabel:'P(their next card is…)',yfmt:v=>pct(v)}),
+      h('p',{class:'small',html:`Uncertainty about their next card: <b>${Hq.toFixed(2)} bits</b> (it starts at ${Hp.toFixed(2)}). Every card you see replaces a guess (“average football”) with a fact.`})); };
+  el.append(s,out); draw(0); };
+
+WG.perm = (el) => { let seed=9; const out=h('div'); const btn=h('button',{class:'chip',onclick:()=>{seed++;run();}},'New 4-card hand');
+  const perms=a=>a.length<=1?[a]:a.flatMap((x,i)=>perms([...a.slice(0,i),...a.slice(i+1)]).map(p=>[x,...p]));
+  const run=()=>{ const R=E.rng(seed), hand=Array.from({length:4},()=>sampler(R).mask); const all=perms([0,1,2,3]).map(p=>[p,E.setOutcome(p.map(i=>hand[i]),D0,true,20).win]).sort((a,b)=>b[1]-a[1]);
+    const W=520,H=130,bw=W/24,mx=all[0][1]||1; let s=`<svg viewBox="0 0 ${W} ${H+64}" width="100%" style="min-width:420px">`;
+    all.forEach(([p,w],i)=>{ const bh=(H-14)*w/mx; s+=`<rect x="${i*bw+2}" y="${H-bh}" width="${bw-4}" height="${bh}" fill="${i===0?'var(--accent)':i===23?'var(--bad)':'var(--muted)'}" rx="2"><title>${pct(w,1)}</title></rect>`; p.forEach((ci,k)=>{ const c=E.maskNames(hand[ci],SCH)[0]; s+=`<rect x="${i*bw+3}" y="${H+6+k*14}" width="${bw-6}" height="11" fill="${E.SWATCH[c]}" stroke="var(--line)"/>`; }); });
+    out.innerHTML=s+'</svg>'; out.append(h('p',{class:'small',html:`All 4! = 24 orders of the same hand, best to worst (1st card on top of each column). Best: <b>${pct(all[0][1])}</b> to win the set. Worst: <b>${pct(all[23][1])}</b>.`})); };
+  el.append(btn,out); run(); };
+
+WG.pathcolour = (el) => { // no-repeat ordering = proper colouring of a path
+  let seed=4; const out=h('div'); const btn=h('button',{class:'chip',onclick:()=>{seed++;run();}},'New 10-card hand');
+  const run=()=>{ const R=E.rng(seed); const hand=Array.from({length:10},()=>NM.find((_,j)=>sampler(R).mask>>j&1)); const cnt={}; hand.forEach(c=>cnt[c]=(cnt[c]||0)+1); const mxc=Math.max(...Object.values(cnt)), lim=Math.ceil(hand.length/2);
+    // greedy: always place the most frequent colour that differs from the previous
+    const left={...cnt}, order=[]; let prev=null; for(let i=0;i<hand.length;i++){ const cand=Object.keys(left).filter(c=>left[c]>0&&c!==prev).sort((a,b)=>left[b]-left[a]); const c=cand[0]||Object.keys(left).find(c=>left[c]>0); order.push(c); left[c]--; prev=c; }
+    const reps=order.slice(1).filter((c,i)=>c===order[i]).length; const row=cs=>cs.map((c,i)=>(i?`<span style="color:${c===cs[i-1]?'var(--bad)':'var(--good)'};font-weight:700">${c===cs[i-1]?'↺':'→'}</span>`:'')+`<span title="${c}" style="display:inline-block;width:22px;height:22px;border-radius:50%;background:${E.SWATCH[c]};border:1px solid var(--muted);vertical-align:middle"></span>`).join(' ');
+    out.innerHTML=''; out.append(h('div',{class:'small',html:'Dealt: '+row(hand)}),h('div',{class:'small',html:'Greedy no-repeat order: '+row(order)}),
+      h('p',{class:'small',html:`Biggest colour group: <b>${mxc}</b> cards (limit for a perfect order: ⌈n/2⌉ = ${lim}). ${mxc<=lim?`So a perfect order exists, and the greedy rule (“place the most common colour that isn’t the previous one”) found one with ${reps} repeats.`:`Too many cards of one colour: some repeats are unavoidable (at least ${mxc-lim}).`}`})); };
+  el.append(btn,out); run(); };
+
+WG.graph = (el) => { let seed=2; const out=h('div'); const btn=h('button',{class:'chip',onclick:()=>{seed++;run();}},'New hand'); const vr=h('select',{id:'gv'},h('option',{value:'dom'},'Your rule: one colour'),h('option',{value:'all'},'Variant: every colour'));
+  const run=()=>{ const P=vr.value==='dom'?pool:poolAll, smp=E.sampler(P), R=E.rng(seed); const hand=Array.from({length:9},()=>smp(R)); const W=380,H=300,cx=W/2,cy=H/2,rad=115; const pos=hand.map((_,k)=>{ const a=-Math.PI/2+2*Math.PI*k/hand.length; return [cx+rad*Math.cos(a),cy+rad*Math.sin(a)]; });
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:440px">`; let edges=0; for(let i=0;i<hand.length;i++) for(let j=i+1;j<hand.length;j++) if(hand[i].mask&hand[j].mask){ edges++; s+=`<line x1="${pos[i][0]}" y1="${pos[i][1]}" x2="${pos[j][0]}" y2="${pos[j][1]}" stroke="var(--muted)" stroke-width="2" opacity=".6"/>`; }
+    hand.forEach((c,k)=>{ const [x,y]=pos[k]; s+=`<circle cx="${x}" cy="${y}" r="23" fill="var(--card)" stroke="var(--ink)"/>`+shirtFromMask(c.mask,P.scheme).replace('<svg ',`<svg x="${x-16}" y="${y-18}" width="32" height="32" `); });
+    out.innerHTML=s+'</svg>'; out.append(h('p',{class:'small',html:`${edges} edges. ${vr.value==='dom'?'With one colour per card the graph splits into separate <b>cliques</b>, one per colour: every red card matches every other red card and nothing else.':'With every colour counting, cliques overlap and the graph becomes one tangled web: far more ways to match.'}`})); };
+  vr.onchange=run; el.append(h('div',{class:'chips'},vr,btn),out); run(); };
+
+WG.matrix = (el) => { const tt=[...poolAll.masks].sort((a,b)=>b[1]-a[1]).slice(0,6); const K=tt.map(([a])=>tt.map(([b])=>(a&b)?1:0)); let v=tt.map(()=>1/Math.sqrt(6)), step=0; const out=h('div');
+  const draw=()=>{ const t=h('table',{class:'heat'}); t.append(h('tr',{},h('th',{},'K'),...tt.map(([m])=>h('th',{html:shirtFromMask(m,poolAll.scheme).replace('<svg','<svg width="20" height="20"')})),h('th',{},'v (step '+step+')')));
+    tt.forEach(([m],i)=>{ const tr=h('tr',{},h('th',{style:'text-align:right'},E.maskNames(m,poolAll.scheme).join('+'))); K[i].forEach(x=>tr.append(h('td',{style:`background:${x?'color-mix(in srgb,var(--accent) 60%,transparent)':'transparent'}`},String(x)))); tr.append(h('td',{},v[i].toFixed(3))); t.append(tr); });
+    const p=tt.map(x=>x[1]), ps=p.reduce((a,b)=>a+b,0), qn=p.map(x=>x/ps); let quad=0; qn.forEach((a,i)=>qn.forEach((b,j)=>quad+=a*K[i][j]*b));
+    out.innerHTML=''; out.append(h('div',{class:'scroll'},t),h('p',{class:'small',html:`pᵀKp = <b>${pct(quad)}</b> for these six shirt types (every-colour variant). With your one-colour rule, K would be the identity matrix and pᵀKp = Σp².`})); };
+  el.append(h('div',{class:'chips'},h('button',{class:'chip',onclick:()=>{ const w=K.map(r=>r.reduce((s,x,j)=>s+x*v[j],0)); const n=Math.hypot(...w)||1; v=w.map(x=>x/n); step++; draw(); }},'Multiply by K'),h('button',{class:'chip',onclick:()=>{ v=tt.map(()=>1/Math.sqrt(6)); step=0; draw(); }},'Reset')),out); draw(); };
+
+WG.incl = (el) => { const cs=['white','red','blue']; const out=h('div'); const sel=cs.map(c=>{ const b=h('button',{class:'chip','aria-pressed':c!=='blue'?'true':'false',onclick:()=>{ b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true'); draw(); }},c); return b; });
+  const draw=()=>{ const on=cs.filter((c,i)=>sel[i].getAttribute('aria-pressed')==='true'); const P=poolAll; const masks=[...P.masks]; const NMa=E.SCHEMES[P.scheme]; const b=c=>1<<NMa.indexOf(c);
+    const has=m=>masks.reduce((s,[x,p])=>s+((x&m)===m?p:0),0); const any=m=>masks.reduce((s,[x,p])=>s+((x&m)?p:0),0);
+    if(!on.length){ out.innerHTML='<p class="small muted">Pick at least one colour.</p>'; return; }
+    const subsets=[]; for(let k=1;k<(1<<on.length);k++) subsets.push(on.filter((_,i)=>k>>i&1)); let total=0; const lines=subsets.map(S=>{ const sign=S.length%2?'+':'−'; const v=has(S.reduce((m,c)=>m|b(c),0)); total+=S.length%2?v:-v; return `${sign} P(${S.join(' & ')}) = ${sign}${(100*v).toFixed(1)}%`; });
+    out.innerHTML=''; out.append(h('div',{class:'formula'},`P(${on.join(' or ')})\n`+lines.join('\n')+`\n= ${(100*total).toFixed(1)}%   (direct count: ${(100*any(on.reduce((m,c)=>m|b(c),0))).toFixed(1)}%)`),h('p',{class:'small'},'Every-colour variant, where a shirt can contain several of these colours. Add the singles, subtract the pairs, add back the triple: the alternating signs undo double counting exactly.')); };
+  el.append(h('div',{class:'chips'},...sel),out); draw(); };
+
+WG.cycle = (el) => { const out=h('div'); const btn=h('button',{class:'chip'},'Play both again'); let seed=4;
+  const run=()=>{ const R=E.rng(seed++), mk=E.makeDeckFactory(pool,40), o={R,F:pool.F,popD:D0,popDist:pool.masks,maxSets:150}; const t1=[],t2=[]; E.playGame(mk(R),'keep','keep',{...o,trace:t1}); E.playGame(mk(R),'random','random',{...o,trace:t2}); const P=t=>[[0,20],...t.map((s,i)=>[i+1,s.after?s.after[0]:(s.ranOut===0?0:40)])];
+    out.innerHTML=''; out.append(lineChart([{pts:P(t1),color:css('--bad'),label:'both “never reorder” (deterministic)'},{pts:P(t2),color:css('--muted'),label:'both shuffle (random)'}],{h:180,ymin:0,ymax:40,xlabel:'set',ylabel:'A’s cards'})); };
+  btn.onclick=run; el.append(btn,out); run(); };
+
+/* ---------- course content ---------- */
+const P1='Part I · Probability', P2='Part II · Random processes', P3='Part III · Game theory', P4='Part IV · Discrete maths';
+const CH = [
+ { id:'intro', part:P1, title:'The game as an experiment', min:8,
+   lead:'Every time you turn a card over, you run a small experiment. Probability is the language for describing experiments whose outcome you can’t predict, but whose patterns you can.',
+   body:[
+    ['p','Pick one card at random from a deck of the 300 most famous teams. Before you look, you can’t say what colour it will be. But if you do it thousands of times, the share of white cards settles down to a fixed number. That number is the <b>probability</b> of drawing white.'],
+    ['def','Sample space','The set of all possible outcomes of an experiment. For one card it’s the list of colours: {white, red, blue, black, yellow, green, …}. An <b>event</b> is any subset, like “the card is red or blue”.'],
+    ['p','Here is the deck you’ll use throughout the course. Each card’s colour is the colour covering most of a real footballer’s shirt, measured from Wikipedia’s kit data.'],
+    ['w','lln','Lab · draw cards and watch the frequencies settle'],
+    ['p','That settling is the <b>law of large numbers</b>: the long-run share of an outcome gets as close as you like to its probability. Notice how wild the line is after 10 cards, and how calm after 1,000.'],
+    ['quiz','After drawing 10 cards, 5 of them were white. What can you conclude?',['The probability of white is 50%','The probability of white is probably somewhere near 50%, but 10 cards is too few to be sure','White is the most common colour'],1,'Ten cards is a tiny sample. Shares jump around a lot early on. The true value here is '+pct(famP.white)+', and you’d need hundreds of draws to pin it down.'],
+   ],
+   take:['A probability is a long-run share.','Small samples bounce around; large samples settle (law of large numbers).','An event is a set of outcomes.'],
+   links:[['Seeing Theory: basic probability','https://seeing-theory.brown.edu/basic-probability/index.html'],['Law of large numbers',W_('Law_of_large_numbers')],['Grinstead & Snell, ch. 1',GS]] },
+
+ { id:'match', part:P1, title:'How likely is a match?', min:10,
+   lead:'The first real question about the game: if two cards are laid one after the other, how often do they share a colour?',
+   body:[
+    ['p','Both cards are independent draws. The chance that <i>both</i> are white is p(white) × p(white). The same goes for red, blue and the rest. A match happens if they’re both white <i>or</i> both red <i>or</i>…, and those cases can’t overlap, so we add them up.'],
+    ['formula','P(match) = p(white)² + p(red)² + p(blue)² + …  =  Σ p(c)²'],
+    ['def','Multiplication and addition rules','For independent events, P(A and B) = P(A)·P(B). For events that can’t both happen, P(A or B) = P(A) + P(B).'],
+    ['w','sigma','Lab · change the colour mix and watch Σp²'],
+    ['p','Two things to notice. First, the match chance is smallest when colours are <b>equally common</b>: with k equal colours it’s exactly 1/k. Second, one dominant colour drives it up fast, because squares reward big shares. That’s why white, on a third of all cards, matters so much.'],
+    ['p','Ecologists use the same formula to measure biodiversity (the Simpson index), and 1/Σp² is the “effective number of species”. Our deck behaves like '+(1/q0).toFixed(1)+' equally common colours.'],
+    ['quiz','A deck is half white and half red. What is P(match)?',['25%','50%','100%'],1,'0.5² + 0.5² = 0.25 + 0.25 = 0.5. With two equal colours you match half the time.'],
+    ['quiz','Which deck has the lowest chance of a match?',['80% white, 20% red','4 colours, 25% each','2 colours, 50% each'],1,'Four equal colours give 4 × 0.25² = 25%, the minimum for four colours. The first deck gives 0.64 + 0.04 = 68%.'],
+   ],
+   take:['P(match) = Σp², the “collision probability”.','It’s smallest when colours are equally common (1/k).','1/Σp² is the effective number of colours.'],
+   links:[['Simpson’s diversity index',W_('Diversity_index#Simpson_index')],['Seeing Theory: compound probability','https://seeing-theory.brown.edu/compound-probability/index.html'],['Khan Academy: probability','https://www.khanacademy.org/math/statistics-probability/probability-library']] },
+
+ { id:'cond', part:P1, title:'Conditional probability: why repeats are wasted', min:10,
+   lead:'Probabilities change when you learn something. This chapter explains the single most useful rule for ordering your cards.',
+   body:[
+    ['p','Suppose you start a set. The opponent’s card is compared with your first card. If it doesn’t match, the set goes on, and your second card is compared with <b>that same opponent card</b>. But now you know something about it: it is <i>not</i> the colour of your first card.'],
+    ['def','Conditional probability','P(A | B) is the probability of A <i>given</i> that B happened. You compute it inside the smaller world where B is true: P(A | B) = P(A and B) / P(B).'],
+    ['w','cond','Lab · pick your first two cards'],
+    ['p','Put the same colour twice and the second card’s chance drops to exactly <b>0%</b>: an opponent card that dodged red can’t be red. Switch colours and the chance goes <i>up</i> compared with the unconditional chance, because the surviving card is more likely to be one of the other colours.'],
+    ['quiz','Your first card is blue and the opponent’s card didn’t match it. Your second card is blue too. What’s the chance it matches?',['The same as normal, about '+pct(famP.blue||0.19),'0%','100%'],1,'Given the opponent’s card is not blue, a blue card can never match it. Conditioning removed every case where blue could win.'],
+    ['quiz','Are “the opponent’s card misses my 1st card” and “it matches my 2nd card” independent events?',['Yes, they’re about different cards of mine','No, they’re about the same opponent card'],1,'Both events concern one opponent card, so knowing one changes the odds of the other. That dependence is exactly what the zig-zag rule exploits.'],
+   ],
+   take:['Conditioning shrinks the world to the cases that are still possible.','Repeating a colour is a guaranteed miss.','Switching colours raises your chance above the unconditional one.'],
+   links:[['Conditional probability',W_('Conditional_probability')],['Seeing Theory: compound probability','https://seeing-theory.brown.edu/compound-probability/index.html'],['Bayes’ theorem',W_('Bayes%27_theorem')]] },
+
+ { id:'ev', part:P1, title:'Expected value: judging an order', min:10,
+   lead:'A set can end in many ways. Expected value turns all of them into one number you can compare between orders.',
+   body:[
+    ['def','Random variable and expectation','A random variable is a number that depends on chance, like “cards I gain this set”. Its expected value is the probability-weighted average: E[X] = Σ x · P(X = x).'],
+    ['p','For a set, X is positive when you win (you gain the opponent’s cards in the pile) and negative when you lose (you give away yours). Long sets mean big piles, so a late win is worth more than an early one, and a late loss costs more.'],
+    ['w','expect','Lab · simulate 4,000 sets for one order'],
+    ['p','The bars show how often each result happened. The simulated average and the exact formula agree, which is the law of large numbers again. Switch between a random order and the shield + zig-zag order and compare both the average and the shape.'],
+    ['quiz','An order wins the set 60% of the time but loses 5 cards whenever it loses, and gains 1 card whenever it wins. Is it a good order?',['Yes, it wins most of the time','No: 0.6 × 1 − 0.4 × 5 = −1.4 cards on average'],1,'Winning often isn’t enough. Expected value weighs each outcome by its size.'],
+   ],
+   take:['Expectation = Σ value × probability.','Compare strategies by expected gain, not just win rate.','Simulation averages converge to the exact expectation.'],
+   links:[['Expected value',W_('Expected_value')],['Khan Academy: random variables','https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library'],['Grinstead & Snell, ch. 6',GS]] },
+
+ { id:'dist', part:P1, title:'Waiting times and rare events', min:12,
+   lead:'Three classic distributions live inside the game: the geometric (how long until a match), the binomial (how many of a colour you hold) and the Poisson (rare colours).',
+   body:[
+    ['def','Geometric distribution','If each try succeeds with probability q, the number of tries until the first success is geometric: P(k) = (1−q)^(k−1)·q, with mean 1/q.'],
+    ['w','geo','Lab · waiting for the first match'],
+    ['p','The real game is only <i>roughly</i> geometric, because comparisons share cards (chapter 3). But the shape, a quick decay with a long tail, is the same.'],
+    ['def','Binomial and Poisson','The number of green cards among 20 is Binomial(20, p). When p is small, Binomial(n, p) is almost exactly Poisson(λ = np): P(k) = e^(−λ) λ^k / k!. This is the “law of rare events”.'],
+    ['w','poisson','Lab · count one colour in simulated 20-card hands'],
+    ['p','Choose a rare colour like green or orange and the two curves nearly coincide. Choose white and they drift apart: Poisson only works for rare events.'],
+    ['quiz','Each comparison matches with probability 25%. On average, how many comparisons until the set ends?',['2','4','25'],1,'For a geometric waiting time the mean is 1/q = 1/0.25 = 4.'],
+    ['quiz','Which colour’s count in your hand is best described by a Poisson distribution?',['White, about '+pct(famP.white)+' of cards','Green, about '+pct(famP.green||0.05)+' of cards'],1,'Poisson approximates the binomial when the event is rare. Green is rare; white is not.'],
+   ],
+   take:['Waiting for a first success → geometric, mean 1/q.','Counting successes in n tries → binomial.','Rare events → Poisson with λ = np.'],
+   links:[['Seeing Theory: distributions','https://seeing-theory.brown.edu/probability-distributions/index.html'],['Poisson distribution',W_('Poisson_distribution')],['Geometric distribution',W_('Geometric_distribution')]] },
+
+ { id:'clt', part:P1, title:'The bell curve appears', min:8,
+   lead:'Add up many small random things and you get the same shape every time. That’s the central limit theorem, one of the most surprising facts in mathematics.',
+   body:[
+    ['p','Count how many of n comparisons end in a match. Each comparison is a yes/no coin with probability q, so the count is binomial. As n grows, its histogram turns into a <b>normal (bell) curve</b> with mean nq and standard deviation √(nq(1−q)).'],
+    ['w','clt','Lab · grow n and watch the bell form'],
+    ['def','Central limit theorem','The sum of many independent random quantities, whatever their individual shape, is approximately normal. Spread grows like √n, not n.'],
+    ['p','This is why long games feel predictable in aggregate but chaotic set by set, and why a small per-set edge becomes a near-certain win over hundreds of sets.'],
+    ['quiz','If you quadruple the number of comparisons, what happens to the spread (standard deviation) of the number of matches?',['It quadruples','It doubles','It stays the same'],1,'Spread grows like √n. √4 = 2.'],
+   ],
+   take:['Sums of many random pieces look normal.','Mean grows like n, spread like √n.','Small edges dominate in the long run.'],
+   links:[['Central limit theorem',W_('Central_limit_theorem')],['Seeing Theory: probability distributions','https://seeing-theory.brown.edu/probability-distributions/index.html'],['Khan Academy: sampling distributions','https://www.khanacademy.org/math/statistics-probability']] },
+
+ { id:'markov', part:P2, title:'Markov chains and the second-mover edge', min:12,
+   lead:'Inside a set, only the last card matters. That makes a set a Markov chain, and it explains why going second is an advantage.',
+   body:[
+    ['def','Markov chain','A process that moves between states, where the next state depends only on the current one. It’s described by a <b>transition matrix</b>: row i lists the chances of moving from state i to every other state.'],
+    ['p','State = colour of the last card laid. The next card either has the same colour (the set ends) or becomes the new state. The starter’s first card can only be matched, never match. So the second player gets the first real chance to win the set.'],
+    ['w','markov','Lab · a four-colour world with its transition matrix'],
+    ['p','Even when colours are equal, the second player wins more than half of the sets. Because the winner must start the next set, the rules quietly push back against whoever is ahead.'],
+    ['quiz','In the table, why is the diagonal (red → red, blue → blue) always 0?',['Because the same colour twice ends the set, so the chain never stays in that state','Because colours can’t repeat in a deck'],0,'Laying the same colour again is a match, which ends the set (absorption), so the chain can’t continue there.'],
+   ],
+   take:['A Markov chain needs only the current state.','The transition matrix holds all the rules.','The second player wins the majority of sets.'],
+   links:[['Markov chains, explained visually','https://setosa.io/ev/markov-chains/'],['Markov chain',W_('Markov_chain')],['Grinstead & Snell, ch. 11',GS]] },
+
+ { id:'ruin', part:P2, title:'Random walks and gambler’s ruin', min:10,
+   lead:'Zoom out from one set to a whole game. Your card count wanders up and down: a random walk with two walls.',
+   body:[
+    ['p','After each set your card count goes up or down. If nobody plays cleverly, ups and downs balance out on average: the game is <b>fair</b>. A fair process like this is called a <b>martingale</b>.'],
+    ['def','Gambler’s ruin','A fair random walk from k that stops at 0 or N reaches N with probability exactly k/N.'],
+    ['w','ruin','Lab · start player A with k of 20 cards and see how often A wins'],
+    ['p','The dots fall close to the straight line k/N. With random play, your chance of winning the game equals your share of the cards. No secret momentum, no luck streaks.'],
+    ['quiz','With random play you hold 15 of the 20 cards. Roughly what is your chance to win?',['50%','75%','100%'],1,'Gambler’s ruin: k/N = 15/20 = 75%.'],
+   ],
+   take:['Random play is a fair game (martingale).','P(win) ≈ your share of the cards.','Skill is what bends the walk.'],
+   links:[['Gambler’s ruin',W_('Gambler%27s_ruin')],['Random walk',W_('Random_walk')],['Grinstead & Snell, ch. 12',GS]] },
+
+ { id:'absorb', part:P2, title:'How long does a game last?', min:8,
+   lead:'An absorbing Markov chain answers “how long until it ends?” exactly, by solving one system of equations.',
+   body:[
+    ['def','Absorbing chain','A Markov chain with states you can never leave, here “A has all the cards” and “A has none”. With Q the moves between non-absorbing states, the expected time to absorption t solves (I − Q)·t = 1. The matrix (I − Q)⁻¹ is the <b>fundamental matrix</b>.'],
+    ['w','duration','Lab · expected game length for any deck size'],
+    ['p','The curve is a hump that peaks when the cards are split evenly, the same k(N−k) shape as in the classic gambler’s ruin. Doubling the deck makes the game about four times longer: a hallmark of random walks, where you need about n² steps to wander n steps away.'],
+    ['quiz','A 20-card game lasts about S sets on average. Roughly how long is a 40-card game?',['2S','4S','S + 20'],1,'Random walks need about n² steps to travel n, so doubling N multiplies the length by about 4.'],
+   ],
+   take:['Absorbing chains give exact expected durations.','Length ∝ k(N−k): longest from an even split.','Doubling the deck ≈ quadruples the game.'],
+   links:[['Absorbing Markov chain',W_('Absorbing_Markov_chain')],['Grinstead & Snell, ch. 11',GS],['MIT 6.041 Probabilistic Systems','https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/']] },
+
+ { id:'strat', part:P3, title:'Strategies and payoffs', min:10,
+   lead:'Game theory starts by writing down what each player can choose, and how well each choice does against each choice of the opponent.',
+   body:[
+    ['def','Strategy','A complete plan. In this game, a strategy is a rule for ordering your hand before every set, for every situation you might face.'],
+    ['p','Shuffling is a strategy. So is “rarest card first, then never repeat a colour”. Try any two strategies against each other:'],
+    ['w','duel','Lab · strategy duel (200 games)'],
+    ['def','Payoff matrix and dominance','A table of results for every pair of strategies. Strategy A <b>dominates</b> B if A does at least as well as B against every opponent. A dominated strategy should never be played.'],
+    ['w','payoff','Lab · the tournament as a payoff matrix'],
+    ['quiz','Strategy X beats Y, Y beats Z, and Z beats X. Can there be a single best strategy?',['Yes, the one with the highest average','Not necessarily: like rock–paper–scissors, the best plan may be a mix'],1,'Cycles mean every pure strategy has a counter. Game theory’s answer is to randomise.'],
+   ],
+   take:['A strategy is a complete plan.','A payoff matrix compares every pair.','Never play a dominated strategy.'],
+   links:[['Game Theory (Yale, Ben Polak)','https://oyc.yale.edu/economics/econ-159'],['Strategic dominance',W_('Strategic_dominance')],['Normal-form game',W_('Normal-form_game')]] },
+
+ { id:'pennies', part:P3, title:'The heart of the game: matching pennies', min:12,
+   lead:'Strip the game down to one decision and you find a famous game from 1944.',
+   body:[
+    ['p','You open a set and want <b>no</b> match. Your opponent answers and wants a match. If you each had only red and blue, that is exactly <b>matching pennies</b>, the simplest zero-sum game, studied by von Neumann and Morgenstern.'],
+    ['w','pennies','Lab · try to beat a computer that learns your habits'],
+    ['p','People are bad at being random: we alternate too much and avoid streaks. The computer spots those patterns. The only unbeatable plan is to be <b>truly random</b>, 50/50, and then it can’t do better than half. Try the “Play 100 truly random” button.'],
+    ['def','Mixed strategy','Choosing between actions at random with fixed probabilities. In matching pennies the equilibrium mixed strategy is 50/50 for both players.'],
+    ['quiz','Why does the 50/50 strategy guarantee you about half the rounds?',['Because the computer can’t predict a fair coin, whatever it does','Because the computer gets tired'],0,'Against a truly random 50/50 player, every reply wins exactly half the time, so no prediction helps.'],
+   ],
+   take:['Opening a set is a matching-pennies duel.','Predictable players get exploited.','Randomising is a strategy, not a lack of one.'],
+   links:[['Matching pennies',W_('Matching_pennies')],['Mixed strategy',W_('Strategy_(game_theory)#Mixed_strategy')],['Theory of Games and Economic Behavior',W_('Theory_of_Games_and_Economic_Behavior')]] },
+
+ { id:'minimax', part:P3, title:'Minimax: playing safe when stakes differ', min:12,
+   lead:'What if a match on one colour costs you more than a match on the other? The best mix is no longer 50/50, and there’s a neat picture that finds it.',
+   body:[
+    ['p','Say a match on blue would hand over a bigger pile than a match on red. You open with red a share x of the time. If the opponent always answers red, you lose a·x cards on average. If they always answer blue, you lose b·(1−x). They’ll pick whichever hurts more.'],
+    ['w','mixed','Lab · the graphical solution of a 2×2 zero-sum game'],
+    ['def','Minimax theorem (von Neumann, 1928)','In every finite two-player zero-sum game there is a mix that minimises your worst-case loss, and the opponent’s best mix gives exactly the same value. Here the solution is x* = b/(a+b).'],
+    ['p','The surprising part: you play the <b>expensive</b> colour <i>less</i>, but not never. If you never opened with it, the opponent would stop guarding against it.'],
+    ['quiz','A match on red costs you 1 card and a match on blue costs 3. How often should you open with red?',['25%','50%','75%'],2,'x* = b/(a+b) = 3/(1+3) = 75%. Red is cheap, so you use it more, but you still mix in blue 25% of the time.'],
+   ],
+   take:['Zero-sum games have a minimax value.','The best mix makes the opponent indifferent.','In 2×2 games it’s where the two lines cross.'],
+   links:[['Minimax theorem',W_('Minimax_theorem')],['Zero-sum game',W_('Zero-sum_game')],['Game Theory (Yale)','https://oyc.yale.edu/economics/econ-159']] },
+
+ { id:'nash', part:P3, title:'Nash equilibrium of the whole game', min:10,
+   lead:'With eleven strategies, how do you find the best mix? Let the strategies learn against each other.',
+   body:[
+    ['def','Nash equilibrium','A choice for every player such that nobody can do better by changing only their own choice. In zero-sum games it coincides with minimax.'],
+    ['def','Fictitious play','Each round, each player picks the best reply to the opponent’s history so far. In zero-sum games the frequencies converge to an equilibrium (Robinson, 1951).'],
+    ['w','fictitious','Lab · fictitious play over the tournament results'],
+    ['p','If one strategy beat every other one, the equilibrium would simply be to play it. With the 20 strategies in our tournament that doesn’t happen: the chess gambit crushes cautious shield players but loses to the calculators; the tempo player beats the card counter but loses narrowly to the plain optimiser. So the equilibrium is a <b>mix</b>, led by the tempo lookahead, with the optimiser and the balanced (poker) opener mixed in. Being unpredictable has real value here.'],
+    ['quiz','What does it mean if fictitious play settles on a single strategy?',['That strategy is a best reply to all the others, so it’s the equilibrium','The algorithm is broken'],0,'A strategy that’s a best reply to everything is a pure equilibrium; there’s no reason to mix.'],
+   ],
+   take:['Nash equilibrium: nobody gains by deviating alone.','Fictitious play learns it by repeated best replies.','Among our 20 strategies the equilibrium is a mix, not a single winner.'],
+   links:[['Nash equilibrium',W_('Nash_equilibrium')],['Fictitious play',W_('Fictitious_play')],['Game Theory (Yale)','https://oyc.yale.edu/economics/econ-159']] },
+
+ { id:'info', part:P3, title:'Information: Bayes and card counting', min:12,
+   lead:'This is a game of imperfect information: you can’t see the opponent’s order. But every card that turns over is evidence.',
+   body:[
+    ['def','Bayesian updating','Start with a <b>prior</b> belief, observe evidence, and get a <b>posterior</b>: posterior ∝ likelihood × prior. Each card you see in the opponent’s hand replaces a guess with a fact.'],
+    ['w','bayes','Lab · reveal the opponent’s cards one by one'],
+    ['def','Entropy','Uncertainty measured in bits: H = −Σ p log₂ p. A fair coin is 1 bit, a sure thing 0 bits.'],
+    ['p','Card counting lowers the uncertainty about what they’ll lay next. Knowing their whole hand still leaves some uncertainty, because you don’t know the order. In the tournament, memory alone added several points of win rate.'],
+    ['quiz','You’ve seen that 8 of their 10 cards are white. What should your opener be?',['A white card','A non-white card, ideally a colour they don’t have'],1,'Their next card is very likely white. A white opener would probably be matched, so lead with a colour they’re unlikely to hold.'],
+   ],
+   take:['Prior + evidence → posterior.','Entropy measures what you don’t know.','Counting cards turns guesses into facts.'],
+   links:[['Bayesian inference',W_('Bayesian_inference')],['Entropy (information theory)',W_('Entropy_(information_theory)')],['3Blue1Brown: Wordle and information theory','https://www.youtube.com/watch?v=v68zYyaEmEA']] },
+
+ { id:'perm', part:P4, title:'Permutations: the space of orders', min:8,
+   lead:'Reordering your hand means choosing a permutation. How many are there, and how do you search them?',
+   body:[
+    ['def','Permutation','An ordering of n objects. There are n! = n × (n−1) × … × 1 of them. 4! = 24, 10! = 3,628,800, 20! ≈ 2.4 × 10¹⁸.'],
+    ['w','perm','Lab · every order of a 4-card hand, scored'],
+    ['p','You can’t try 20! orders. The optimiser instead swaps two cards at a time (a <b>transposition</b>) and keeps the swap if it helps. Transpositions generate the whole <b>symmetric group</b> Sₙ, so any order can be reached this way.'],
+    ['quiz','How many orders does a 5-card hand have?',['25','120','3,125'],1,'5! = 5 × 4 × 3 × 2 × 1 = 120.'],
+   ],
+   take:['n cards → n! orders.','Swaps (transpositions) reach every order.','Local search swaps until nothing improves.'],
+   links:[['Permutation',W_('Permutation')],['Symmetric group',W_('Symmetric_group')],['Group Explorer','https://nathancarter.github.io/group-explorer/']] },
+
+ { id:'graphs', part:P4, title:'Graphs and colouring', min:12,
+   lead:'Draw cards as dots and matches as lines, and strategy questions turn into graph questions.',
+   body:[
+    ['def','Graph','Vertices (dots) joined by edges (lines). A <b>clique</b> is a set of vertices all joined to each other.'],
+    ['w','graph','Lab · the match graph of a hand'],
+    ['p','Your ordered hand is a <b>path</b>: card 1 – card 2 – card 3 … The zig-zag rule says neighbouring cards must have different colours. That’s exactly a <b>proper colouring of a path graph</b>.'],
+    ['def','When is a no-repeat order possible?','You can order n coloured cards with no two neighbours alike if and only if no colour holds more than ⌈n/2⌉ of them. Placing “the most common colour that isn’t the previous one” always finds such an order.'],
+    ['w','pathcolour','Lab · find a no-repeat order'],
+    ['quiz','You hold 7 cards: 5 white, 1 red, 1 blue. Can you order them with no two whites side by side?',['Yes','No'],1,'⌈7/2⌉ = 4, but you have 5 whites. With only 2 other cards to separate them, at most 3 whites can be kept apart.'],
+   ],
+   take:['Matches form a graph; one colour per card gives separate cliques.','A no-repeat order is a proper colouring of a path.','Possible exactly when no colour exceeds ⌈n/2⌉.'],
+   links:[['Network Science (free book)','https://networksciencebook.com/'],['Graph coloring',W_('Graph_coloring')],['Clique (graph theory)',W_('Clique_(graph_theory)')]] },
+
+ { id:'linalg', part:P4, title:'Matrices and eigenvectors', min:10,
+   lead:'Tables of numbers can act on lists of numbers. Repeat that action and a special list, the eigenvector, appears.',
+   body:[
+    ['def','Matrix as an action','Multiplying a vector by a matrix K mixes its entries. P(match) = pᵀKp, where K[i][j] = 1 if card types i and j match.'],
+    ['p','With your rule, K is the identity (a card only matches its own colour), so pᵀKp = Σp², chapter 2 again. In the every-colour variant K has extra 1s and becomes interesting: multiply any vector by K again and again and it lines up with the <b>Perron eigenvector</b>, which ranks shirts by how central they are. Google’s PageRank used the same idea.'],
+    ['w','matrix','Lab · power iteration step by step'],
+    ['quiz','With one colour per card, what is the compatibility matrix K?',['All ones','The identity matrix','All zeros'],1,'Each type matches only itself, so K has 1s on the diagonal and 0s elsewhere.'],
+   ],
+   take:['P(match) is a quadratic form pᵀKp.','Repeated multiplication finds the main eigenvector.','Perron–Frobenius guarantees a positive one.'],
+   links:[['3Blue1Brown: Essence of linear algebra','https://www.3blue1brown.com/topics/linear-algebra'],['MIT 18.06 Linear Algebra','https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/'],['Power iteration',W_('Power_iteration')]] },
+
+ { id:'ie', part:P4, title:'Counting overlaps: inclusion–exclusion', min:8,
+   lead:'How likely is a card to match at least one of several colours? Adding probabilities double-counts. Here’s the fix.',
+   body:[
+    ['def','Inclusion–exclusion','P(A or B or C) = P(A) + P(B) + P(C) − P(A&B) − P(A&C) − P(B&C) + P(A&B&C). Add singles, subtract pairs, add triples…'],
+    ['w','incl','Lab · pick colours and watch the terms cancel'],
+    ['p','With one colour per card, a card can’t be two colours at once, so all the overlap terms are 0 and you just add. In the every-colour variant they matter. The engine computes these sums for all colour sets at once using a “subset-sum” pass over the <b>Boolean lattice</b>, the inverse of Möbius inversion.'],
+    ['quiz','30% of shirts contain white, 25% contain red and 10% contain both. What share contains white or red?',['55%','45%','65%'],1,'30% + 25% − 10% = 45%.'],
+   ],
+   take:['Add, subtract the double-counted, add back the triple-counted.','With one colour per card, overlaps vanish.','The Boolean lattice organises all colour sets.'],
+   links:[['Inclusion–exclusion principle',W_('Inclusion%E2%80%93exclusion_principle')],['Möbius inversion formula',W_('M%C3%B6bius_inversion_formula')],['Hasse diagram',W_('Hasse_diagram')]] },
+
+ { id:'cycles', part:P4, title:'Why some games never end', min:10,
+   lead:'Can a game go on forever? For deterministic play the answer comes from one of the simplest ideas in mathematics.',
+   body:[
+    ['def','Pigeonhole principle','Put more letters than pigeonholes and some hole gets two. A deterministic system with finitely many states must eventually revisit a state, and then it repeats forever.'],
+    ['w','cycle','Lab · deterministic players vs random players'],
+    ['p','When both players “never reorder”, the whole game is deterministic. Some deals fall into a loop and the card counts stop moving. Shuffling breaks loops: as Lakshtanov and Roshchina proved for War, a little randomness makes the expected game length finite. In 2024 a never-ending game of Beggar-my-neighbour was finally found, answering a question posed by John Conway.'],
+    ['quiz','Why can’t a game between two random shufflers loop forever (with probability 1)?',['Because from every position there’s a positive chance of moving toward an end','Because random players are smarter'],0,'Randomness keeps a door open: some sequence of shuffles leads to the end, and over infinite time it will be found.'],
+   ],
+   take:['Finite + deterministic ⇒ eventually periodic.','Randomness breaks cycles.','Open problems hide in simple card games.'],
+   links:[['Pigeonhole principle',W_('Pigeonhole_principle')],['A Non-Terminating Game of Beggar-My-Neighbor (2024)','https://arxiv.org/abs/2403.13855'],['Finiteness in the Card Game of War','https://arxiv.org/abs/1007.1371']] },
+];
+
+/* ---------- rendering ---------- */
+const doneCount = () => CH.filter(c=>prog[c.id]?.done).length;
+function renderToc(cur){ const t=$('#toc'); t.innerHTML=''; let part=null;
+  CH.forEach((c,i)=>{ if(c.part!==part){ part=c.part; t.append(h('div',{class:'part'},part)); }
+    t.append(h('button',{'aria-current':String(c.id===cur),onclick:()=>go(c.id)},h('span',{class:'n'},String(i+1).padStart(2,'0')),h('span',{},c.title),h('span',{class:'tick'},prog[c.id]?.done?'✓':''))); });
+  $('#progBar').style.width=(100*doneCount()/CH.length).toFixed(0)+'%'; $('#progLabel').textContent=`${doneCount()} of ${CH.length} chapters completed`; }
+function quizEl(ch, qi, [q,opts,ans,why]){ const box=h('div',{class:'quiz'}); box.append(h('div',{class:'small muted',style:'font-weight:700;text-transform:uppercase;letter-spacing:.08em'},'Check yourself'),h('div',{class:'q'},q)); const o=h('div',{class:'opts'}); const res=h('div',{class:'why'});
+  const prev=prog[ch.id]?.quiz?.[qi];
+  const mark=(i)=>{ [...o.children].forEach((b,j)=>{ b.classList.toggle('right',j===ans&&(i===ans||i!=null)); b.classList.toggle('wrong',j===i&&i!==ans); }); res.innerHTML=(i===ans?'<b style="color:var(--good)">Right.</b> ':'<b style="color:var(--bad)">Not quite.</b> ')+why; };
+  opts.forEach((t,i)=>o.append(h('button',{class:'opt',onclick:()=>{ prog[ch.id]=prog[ch.id]||{}; prog[ch.id].quiz=prog[ch.id].quiz||{}; prog[ch.id].quiz[qi]=i; save(); mark(i); }},t)));
+  box.append(o,res); if(prev!=null) setTimeout(()=>mark(prev)); return box; }
+function go(id, scroll=true){
+  const i=CH.findIndex(c=>c.id===id), ch=CH[i]||CH[0]; const m=$('#main'); m.innerHTML=''; let qi=0;
+  m.append(h('div',{class:'eyebrow'},ch.part+' · Chapter '+(i+1)),h('h1',{},ch.title),h('div',{class:'meta'},h('span',{},'About '+ch.min+' minutes'),(()=>{const nl=ch.body.filter(b=>b[0]==='w').length;return h('span',{},nl+(nl===1?' lab':' labs'));})(),(()=>{const nq=ch.body.filter(b=>b[0]==='quiz').length;return h('span',{},nq+(nq===1?' question':' questions'));})()),h('p',{class:'lead'},ch.lead));
+  const read=h('div',{class:'read'});
+  for(const b of ch.body){
+    if(b[0]==='p') read.append(h('p',{html:b[1]}));
+    else if(b[0]==='def') read.append(h('div',{class:'def',html:`<b>${b[1]}</b>${b[2]}`}));
+    else if(b[0]==='formula') read.append(h('div',{class:'formula'},b[1]));
+    else if(b[0]==='w'){ const bench=h('div',{class:'bench'},h('div',{class:'lab'},b[2])); const body=h('div',{style:'min-width:0'}); bench.append(body); read.append(bench); try{ WG[b[1]](body); }catch(e){ console.error(e); body.append(h('p',{class:'muted'},'This lab could not start.')); } }
+    else if(b[0]==='quiz') read.append(quizEl(ch, qi++, b.slice(1)));
+  }
+  m.append(read);
+  m.append(h('div',{class:'takeaways'},h('h3',{},'Key takeaways'),h('ul',{},...ch.take.map(t=>h('li',{},t)))));
+  m.append(h('div',{class:'more'},h('b',{},'Go further: '),...ch.links.flatMap(([t,u],k)=>[k?' · ':'',h('a',{href:u,target:'_blank',rel:'noopener'},t)])));
+  const doneBtn=h('button',{class:prog[ch.id]?.done?'btn ghost':'btn',onclick:()=>{ prog[ch.id]=prog[ch.id]||{}; prog[ch.id].done=!prog[ch.id].done; save(); renderToc(ch.id); doneBtn.textContent=prog[ch.id].done?'Completed ✓':'Mark chapter as done'; doneBtn.className=prog[ch.id].done?'btn ghost':'btn'; }},prog[ch.id]?.done?'Completed ✓':'Mark chapter as done');
+  m.append(h('div',{class:'nav'},i>0?h('button',{class:'btn ghost',onclick:()=>go(CH[i-1].id)},'← '+CH[i-1].title):h('span'),doneBtn,i<CH.length-1?h('button',{class:'btn',onclick:()=>{ prog[ch.id]=prog[ch.id]||{}; prog[ch.id].done=true; save(); go(CH[i+1].id); }},CH[i+1].title+' →'):h('span')));
+  renderToc(ch.id); prog.last=ch.id; save(); try{ history.replaceState(null,'','#'+ch.id); }catch(e){}
+  if(scroll) window.scrollTo({top:0,behavior:'instant'});
+}
+const start=(location.hash||'').slice(1);
+go(CH.some(c=>c.id===start)?start:(prog.last&&CH.some(c=>c.id===prog.last)?prog.last:'intro'), false);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1277 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shirt Match Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a kit-room notebook — sticky tab strip, one working panel at a time, controls left / results right on wide screens */
+:root{
+  --paper:#f5f6f0; --card:#ffffff; --ink:#15212b; --muted:#5a6670; --line:#d8dcd2;
+  --accent:#0d7a49; --accent-ink:#ffffff; --flag:#e3b100; --bad:#c2372f; --good:#0d7a49;
+  --grid:rgba(21,33,43,.08); --shadow:0 1px 2px rgba(21,33,43,.08);
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e1613; --card:#16201c; --ink:#e6ede8; --muted:#93a39a; --line:#26342e;
+  --accent:#3cc47f; --accent-ink:#06120c; --flag:#f0c419; --bad:#ef6a5f; --good:#3cc47f;
+  --grid:rgba(230,237,232,.08); --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1613; --card:#16201c; --ink:#e6ede8; --muted:#93a39a; --line:#26342e;
+  --accent:#3cc47f; --accent-ink:#06120c; --flag:#f0c419; --bad:#ef6a5f; --good:#3cc47f;
+  --grid:rgba(230,237,232,.08); --shadow:none; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font:16px/1.5 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+header.top{padding-block:28px 12px;display:grid;gap:6px}
+h1{font:800 clamp(40px,7vw,68px)/.9 var(--f-display);letter-spacing:.01em;margin:0;text-transform:uppercase;text-wrap:balance}
+h1 .num{color:var(--accent)}
+.lede{max-width:68ch;color:var(--muted);margin:0}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);border-bottom:2px solid var(--ink);display:flex;gap:2px;overflow-x:auto;padding-top:8px;scrollbar-width:none}
+nav.tabs button{font:700 15px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:12px 14px;cursor:pointer;white-space:nowrap;border-radius:6px 6px 0 0}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+nav.tabs button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--flag);outline-offset:2px}
+section.panel{padding-top:24px;display:grid;gap:24px;grid-template-columns:minmax(0,1fr)}
+h2{font:800 34px/1 var(--f-display);text-transform:uppercase;margin:0;letter-spacing:.01em}
+h3{font:700 22px/1.1 var(--f-display);text-transform:uppercase;margin:0 0 8px;letter-spacing:.02em}
+p{margin:0 0 10px;max-width:72ch}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+p .mono,li .mono{overflow-wrap:anywhere}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:24px;align-items:start}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:860px){.grid2,.cols2{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.controls{display:grid;gap:14px}
+.controls fieldset{border:0;padding:0;margin:0;display:grid;gap:8px}
+.controls legend{font:700 13px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+label.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:15px}
+label.chk{display:flex;gap:8px;align-items:center;font-size:15px;cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+select,input[type=number],input[type=search]{font:15px var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+.btn{font:700 14px/1 var(--f-body);letter-spacing:.05em;text-transform:uppercase;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:6px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:wait}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 13px var(--f-body);border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{border-top:3px solid var(--ink);padding-top:8px}
+.kpi .v{font:800 38px/1 var(--f-display)}
+.kpi .l{font-size:13px;color:var(--muted)}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:22px 92px minmax(0,1fr) 56px;gap:8px;align-items:center;font-size:14px}
+.bar .track{height:14px;background:var(--grid);border-radius:3px;overflow:hidden}
+.bar .fill{height:100%;background:var(--ink)}
+.sw{width:18px;height:18px;border-radius:4px;border:1px solid var(--line);display:inline-block}
+.deckgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:10px}
+.cardx{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center;font-size:12px;line-height:1.2;min-width:0}
+.cardx svg{width:46px;height:46px;display:block;margin:0 auto 4px}
+.cardx .t{overflow-wrap:anywhere}
+.cardx .k{color:var(--muted);font-size:11px}
+table.tbl{border-collapse:collapse;width:100%;font-size:14px}
+table.tbl th,table.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+table.tbl th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.scroll{overflow-x:auto}
+.stack{display:flex;height:16px;border-radius:3px;overflow:hidden;min-width:160px;border:1px solid var(--line)}
+.stack span{height:100%}
+.pbar{display:flex;align-items:center;gap:8px}
+.pbar .track{flex:1;height:10px;background:var(--grid);border-radius:3px;min-width:60px}
+.pbar .fill{height:100%;background:var(--accent);border-radius:3px}
+.heat td{text-align:center;font-family:var(--f-mono);font-size:12px;padding:6px 4px;border:1px solid var(--paper)}
+.heat th{font-size:11px;padding:4px;color:var(--muted);white-space:nowrap}
+.heat th.rot{height:120px;vertical-align:bottom}
+.heat th.rot div{writing-mode:vertical-rl;transform:rotate(180deg)}
+svg text{fill:var(--ink);font-family:var(--f-body)}
+svg .axis{stroke:var(--line)}
+svg .gridl{stroke:var(--grid)}
+.insight{border-left:4px solid var(--flag);padding:4px 0 4px 12px}
+.insight > b{display:block;font:700 19px/1.15 var(--f-display);text-transform:uppercase;letter-spacing:.02em}
+.formula{font-family:var(--f-mono);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:8px 10px;overflow-x:auto;font-size:13px;white-space:pre-wrap}
+.prog{height:6px;background:var(--grid);border-radius:3px;overflow:hidden}
+.prog div{height:100%;width:0;background:var(--accent);transition:width .2s}
+.playlog{display:grid;gap:8px}
+.setrow{display:flex;gap:4px;align-items:center;flex-wrap:wrap;font-size:12px}
+.setrow svg{width:30px;height:30px}
+.tag{font:700 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:4px;background:var(--grid)}
+.tag.a{background:var(--accent);color:var(--accent-ink)}
+.tag.b{background:var(--flag);color:#15212b}
+details summary{cursor:pointer;font-weight:600}
+.vsrow{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin:8px 0}
+.vsside{display:grid;gap:6px;justify-items:center}
+.vsback{width:84px;height:112px;border-radius:9px;border:2px solid var(--ink);background:repeating-linear-gradient(45deg,var(--accent) 0 6px,color-mix(in srgb,var(--accent) 70%,var(--card)) 6px 12px);display:grid;align-content:center;justify-items:center;gap:2px;color:var(--accent-ink);font:inherit;padding:0}
+.vsback .n{font:800 30px/1 var(--f-display);background:var(--card);color:var(--ink);border-radius:6px;padding:2px 8px}
+.vsback .l{font:700 10px/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.06em;background:var(--card);color:var(--ink);border-radius:4px;padding:2px 4px;max-width:76px;text-align:center}
+.vsback.live{cursor:pointer;box-shadow:0 0 0 4px color-mix(in srgb,var(--flag) 70%,transparent);animation:vspulse 1.2s ease-in-out infinite}
+@keyframes vspulse{50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--flag) 35%,transparent)}}
+a{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <h1>Shirt Match <span class="num">Lab</span></h1>
+  <p class="lede">The childhood card game, rebuilt from real kits. Each card is a footballer, and the card’s colour is the colour covering most of his shirt, measured from Wikipedia’s kit data for about 22,700 teams. Lay a card of the same colour as the last one played and you take the whole pile.</p>
+</header>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+
+<!-- RULES -->
+<section class="panel" id="p-rules" role="tabpanel">
+  <div class="cols2">
+    <div class="box">
+      <h3>The game</h3>
+      <p>Two players split the deck. Before each <b>set</b> you may reorder your own cards, which you can see but your opponent can’t. During a set the order is locked, and the players take turns laying the top card face up.</p>
+      <p>Each card has <b>one colour</b>: the colour that covers most of the shirt. If two colours cover about the same area, a preset order decides (red, blue, green and other strong colours before black, grey and white). If the card you lay has the same colour as the card just laid, you win the whole pile. The winner starts the next set. You lose when it’s your turn and you have no cards.</p>
+      <p class="muted small">Your card k is only ever compared with the opponent’s cards right before and right after it. That one fact drives most of the strategy.</p>
+    </div>
+    <div class="box">
+      <h3>Who checks against whom</h3>
+      <div id="rulesDiagram" class="scroll"></div>
+      <p class="small muted">Arrows show which comparisons can end the set, and who wins if they match. The player who starts has an opening card that can be matched but can never match anything itself.</p>
+    </div>
+  </div>
+  <div class="box" id="headline"></div>
+</section>
+
+<!-- DECK -->
+<section class="panel" id="p-deck" role="tabpanel" hidden>
+  <div class="grid2">
+    <div class="box controls" id="controls"></div>
+    <div style="display:grid;gap:20px;min-width:0">
+      <div class="kpis" id="kpis"></div>
+      <div class="box"><h3>How often each colour appears on a card</h3><div class="bars" id="freqBars"></div></div>
+      <div class="box"><h3>Most common shirts</h3><div class="deckgrid" id="topCombos"></div></div>
+      <div class="box"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><h3 style="margin:0">A sample 40-card deck</h3><button class="btn ghost" id="redeal">Deal again</button></div><p class="small muted" style="margin-top:6px">Drawn at random from the weighted pool. Several cards from the same team are normal, since a team has many players.</p><div class="deckgrid" id="sampleDeck"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPLORE -->
+<section class="panel" id="p-explore" role="tabpanel" hidden>
+  <div class="box">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+      <h3 style="margin:0">Colour breakdown</h3>
+      <label class="chk">Group by <select id="dim">
+        <option value="confed-c">Confederation: clubs</option>
+        <option value="confed-n">Confederation: national teams</option>
+        <option value="league">Top leagues</option>
+        <option value="country">Countries (most famous teams)</option>
+        <option value="decade">Decade (history sample)</option>
+        <option value="type">Club vs national, men vs women</option>
+      </select></label>
+    </div>
+    <p class="small muted" style="margin-top:8px">These use your current colour and kit-usage settings from the Deck tab. Each group includes all of its teams, not just the top N. “Match chance” is the probability that two random cards from that group share a colour.</p>
+    <div class="scroll"><table class="tbl" id="breakdown"></table></div>
+  </div>
+  <div class="box">
+    <h3>Look up a team</h3>
+    <input type="search" id="teamQ" placeholder="e.g. Ajax, Persepolis, Brazil" style="width:100%;max-width:420px">
+    <div id="teamOut" style="margin-top:12px;display:grid;gap:10px"></div>
+  </div>
+</section>
+
+<!-- DISTRIBUTIONS -->
+<section class="panel" id="p-dist" role="tabpanel" hidden>
+  <div class="box"><h3>Facts about the colours</h3><p class="small muted">Worked out live from the current Deck settings. Change the deck (for example, turn off fame weighting) and these update.</p><div id="dFacts" style="display:grid;gap:12px"></div></div>
+  <div class="cols2">
+    <div class="box"><h3>Home, away, third</h3><p>Share of shirts showing each colour, by kit. Away kits exist to avoid clashes, so they lean white. Third kits are where black, grey and pink show up.</p><div id="dKits"></div></div>
+    <div class="box"><h3>Clubs vs national teams</h3><p>Home kits only. National teams follow their flags.</p><div id="dNat"></div></div>
+    <div class="box"><h3>Which colours go together</h3><p><b>Lift</b> = how often two colours share a shirt, compared with chance. Above 1 means teams seek the pair out. Near 0 means it’s avoided. Most pairs score below 1, because a shirt rarely has more than two colours.</p><div class="scroll" id="dLift"></div></div>
+    <div class="box"><h3>A few shirts dominate (Zipf’s law)</h3><p>Colour combinations ranked by frequency, on log–log axes. A roughly straight line means a <b>power law</b>: the 2nd combination is much rarer than the 1st, the 10th rarer still, like word frequencies in a language.</p><div id="dZipf"></div></div>
+  </div>
+  <div class="box"><h3>Where the game meets probability distributions</h3>
+    <div id="dMap" class="scroll"></div>
+  </div>
+  <div class="cols2">
+    <div class="box"><h3>Poisson: rare colours in your hand</h3><p>How many cards of one colour land in a 20-card hand? Exactly <b>Binomial(20, p)</b>. When the colour is rare, that’s almost identical to <b>Poisson(20p)</b>: the “law of rare events”. Common colours break the approximation.</p>
+      <label class="chk">Colour <select id="dPoisCol"></select></label><div id="dPois"></div></div>
+    <div class="box"><h3>Not Poisson: colours per shirt</h3><p>This looks at every colour on the real shirts, before they’re reduced to one card colour. If colours were added to shirts at random, the count would look like 1 + Poisson. Real shirts are more regular: designers stop at two colours, so three-colour shirts are much rarer than Poisson predicts. Statisticians call this <b>under-dispersion</b>.</p><div id="dNcol"></div></div>
+    <div class="box"><h3>Geometric: how long a set lasts</h3><p>Waiting for the first match is like waiting for the first head when flipping a coin, which gives a <b>geometric</b> distribution. It isn’t exactly geometric, though. The chance of ending at each card falls after the first comparison, because a set that survives has drifted towards rare colours. It settles at the largest eigenvalue of the “no-match” matrix (Perron–Frobenius).</p><div id="dGeo"></div></div>
+    <div class="box"><h3>The birthday problem</h3><p>With 365 birthdays you need 23 people for a 50% chance of a shared birthday. Shirts have only about six common colours, so a shared colour is almost guaranteed within five cards.</p><div id="dBday"></div></div>
+    <div class="box"><h3>Coupon collector</h3><p>How many cards must you see before every common colour (over 2% of shirts) has appeared? The rarest colour sets the wait. The theory says about n·(1 + 1/2 + … + 1/n) for n equally common colours, and unequal colours take longer.</p><div id="dCoupon"></div></div>
+    <div class="box"><h3>Random walk: how long a game lasts</h3><p>Under random play your card count is a fair <b>random walk</b> (gambler’s ruin). Game lengths are very spread out: the standard deviation is about as large as the mean, with a long right tail, typical of first-passage times.</p><div id="dGame"></div></div>
+  </div>
+</section>
+
+<!-- VS COMPUTER -->
+<section class="panel" id="p-vs" role="tabpanel" hidden>
+  <div class="box" style="display:flex;gap:14px;flex-wrap:wrap;align-items:end;justify-content:space-between">
+    <div style="display:grid;gap:4px"><h3 style="margin:0">Play against the computer</h3><p class="small muted" style="margin:0">You’re the green player. Deal, arrange your hand before each set, then flip your top card when it’s your turn. The computer plays its own cards. Turn on hints for a coach, your odds and a card-counting panel, or leave them off and keep track yourself.</p></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+      <label class="small" style="display:grid;gap:2px">Computer plays<select id="vsOpp"></select></label>
+      <label class="small" style="display:grid;gap:2px">Cards<select id="vsN"><option value="20">20</option><option value="30">30</option><option value="40" selected>40</option></select></label>
+      <label class="chk small" title="Show the coach, your odds and what you know about their hand"><input type="checkbox" id="vsCoach"> Hints &amp; coach</label>
+      <label class="chk small" title="A blackjack-style running count of white cards in the computer’s hand"><input type="checkbox" id="vsWhite" checked> White count</label>
+      <button class="btn" id="vsNew">New game</button>
+    </div>
+  </div>
+  <div class="grid2" style="grid-template-columns:minmax(0,1fr) minmax(260px,360px)">
+    <div style="display:grid;gap:16px;min-width:0;grid-template-columns:minmax(0,1fr)">
+      <div class="box" id="vsScore"></div>
+      <div class="box" id="vsTable"></div>
+      <div class="box" id="vsHand"></div>
+    </div>
+    <div style="display:grid;gap:16px;min-width:0;grid-template-columns:minmax(0,1fr)">
+      <div class="box" id="vsCountBox"></div>
+      <div class="box" id="vsCoachBox"></div>
+      <div class="box" id="vsKnow"></div>
+      <div class="box" id="vsLog"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAY -->
+<section class="panel" id="p-play" role="tabpanel" hidden>
+  <div class="cols2">
+    <div class="box controls">
+      <h3>Match-up</h3>
+      <label class="row">Player A <select id="sa"></select></label>
+      <label class="row">Player B <select id="sb"></select></label>
+      <label class="row">Deck size <input type="number" id="deckSize" min="6" max="200" step="2" value="40" style="width:90px"></label>
+      <label class="row">Games <input type="number" id="nGames" min="10" max="5000" step="10" value="300" style="width:90px"></label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="runMatch">Run match-up</button><button class="btn ghost" id="runTrace">Watch one game</button></div>
+      <div class="prog"><div id="prog1"></div></div>
+      <div id="matchOut"></div>
+    </div>
+    <div class="box"><h3>One game, set by set</h3><div id="traceOut"><p class="muted">Press “Watch one game” to deal a deck and play it out. The chart tracks Player A’s cards after each set.</p></div></div>
+  </div>
+  <div class="box">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+      <h3 style="margin:0">Tournament</h3>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label class="chk">Games per pairing <input type="number" id="tGames" value="100" min="10" max="2000" step="10" style="width:80px"></label><button class="btn" id="runTourn">Run tournament</button></div>
+    </div>
+    <div class="chips" id="tStrats" style="margin-top:10px"></div>
+    <div class="prog" style="margin-top:10px"><div id="prog2"></div></div>
+    <p class="small muted" id="tNote" style="margin-top:8px"></p>
+    <div class="scroll" id="tOut"></div>
+  </div>
+</section>
+
+<!-- STRATEGIES -->
+<section class="panel" id="p-strategies" role="tabpanel" hidden>
+  <div class="box"><h3>Every strategy, explained</h3>
+    <p>Each card below takes the <b>same 8-card hand</b> and shows the order that strategy would lay it out for a set it starts. Read each strip from left to right.</p>
+    <div class="legend small" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:6px">
+      <span><span class="tag" style="background:var(--flag);color:#15212b">opener</span> the first card can only be hit, never hit back</span>
+      <span><svg width="34" height="12"><path d="M2 10 Q17 -2 32 10" fill="none" stroke="var(--good)" stroke-width="3"/></svg> switch: next card shares no colour with the previous one, so it’s a fresh attack</span>
+      <span><svg width="34" height="12"><path d="M2 10 Q17 -2 32 10" fill="none" stroke="var(--bad)" stroke-width="3" stroke-dasharray="4 3"/></svg> repeat: shares a colour, so the attack is wasted</span>
+      <span><span class="mono">%</span> under a shirt = chance a random card matches it; dots = its colours</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn ghost" id="newHand">Try another hand</button><span class="small muted">The cards come from the current Deck settings.</span></div>
+  </div>
+  <div id="stratCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:20px"></div>
+  <div class="box"><h3>Edges we found</h3><div id="edges" style="display:grid;gap:14px"></div></div>
+  <div class="box"><h3>The strategies</h3><div class="scroll"><table class="tbl" id="stratTable"></table></div></div>
+  <div class="box"><h3>Ideas borrowed from other games</h3><p class="small">Techniques from poker, chess, backgammon, Scrabble and blackjack, each turned into a strategy and tested head to head (200 games per pairing, 40-card decks). Numbers are % of games won.</p><div class="scroll" id="crossOut"></div><div class="small" id="crossNote"></div></div>
+  <div class="box"><h3>Counting systems, blackjack-style</h3><p class="small">How much of card counting’s value can you keep with a simple running count? Each cell is the % of games the row strategy wins against the column (300 games each, 40-card decks). “White count” remembers one number, “White + red” two, “Full count” every colour.</p><div class="scroll" id="countStudy"></div><div id="countNote" class="small"></div></div>
+  <div class="box"><h3>Does it hold for other decks?</h3><p class="small muted">Win rate of each strategy against random shuffling, 300 games per cell, 40-card decks. Columns are different deck assumptions.</p><div class="scroll"><table class="tbl heat" id="robust"></table></div>
+    <h3 style="margin-top:18px">Bigger decks reward skill more</h3><div id="deckSizeOut"></div></div>
+</section>
+
+<!-- MATH -->
+<section class="panel" id="p-math" role="tabpanel" hidden>
+  <div class="box small" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span>New to these ideas? The <b>Learn the maths</b> tab explains each one step by step, with examples and interactive pictures.</span><button class="btn ghost" onclick="document.getElementById('tab-learn').click()">Go to lessons</button></div>
+  <div class="cols2">
+    <div class="box"><h3>1 · Probability: the match chance</h3>
+      <p>Write each card as the set of its colours, <span class="mono">x ⊆ {white, red, …}</span>. Two cards match unless the sets are disjoint. With card types appearing with probability <span class="mono">p(x)</span>:</p>
+      <div class="formula">P(match) = Σx Σy p(x) p(y) · [x ∩ y ≠ ∅]
+d(x)     = P(random card misses x) = Σ_{y ⊆ complement(x)} p(y)</div>
+      <p class="small">d(x) is a <b>subset sum</b> over the Boolean lattice. All 2<sup>F</sup> values come from one zeta transform, the inverse of Möbius inversion on that lattice.</p>
+      <div id="mProb"></div>
+    </div>
+    <div class="box"><h3>2 · Markov chain: second-mover advantage</h3>
+      <p>Under random play a set is a Markov chain whose state is the last card laid. The set ends at card L with probability below. Even L means the <b>second</b> player won.</p>
+      <div id="mSetLen"></div>
+    </div>
+    <div class="box"><h3>3 · Absorbing chain: who wins the game</h3>
+      <p>Over a whole game the state is (A’s cards, who starts). Solving <span class="mono">(I − Q)·w = b</span> with the fundamental matrix gives exact win odds and expected length under random play. The curve is almost the straight line k/N: random play is a <b>fair game (martingale)</b>, like gambler’s ruin.</p>
+      <div id="mChain"></div>
+    </div>
+    <div class="box"><h3>4 · Graph: the colour network</h3>
+      <p>Each colour is a node sized by how often it appears. Each edge is a colour pair worn on the same shirt, with thickness showing how often. A card is a clique in this graph, and two cards match exactly when their cliques share a node.</p>
+      <div id="mGraph"></div>
+    </div>
+    <div class="box"><h3>5 · Matrix: compatibility &amp; eigenvector</h3>
+      <p>K<sub>ij</sub> = 1 if shirt types i and j share a colour. Then <span class="mono">P(match) = pᵀ K p</span> is a quadratic form. The Perron eigenvector of K ranks shirts by how “central” they are: how many other shirts they hit, weighted by how central those are in turn.</p>
+      <div class="scroll" id="mMatrix"></div>
+    </div>
+    <div class="box"><h3>6 · Algebra: symmetry &amp; permutations</h3>
+      <p><b>Colour symmetry.</b> The rules don’t care which colour is which. Any relabelling σ ∈ S<sub>F</sub> of the F colours maps games to games. Strategies that only count colours, such as “colourful first”, are invariant under the whole group. Real kit frequencies break that symmetry, and that’s exactly what the smarter strategies exploit.</p>
+      <p><b>Deck orders.</b> A hand of n cards has n! orders, the symmetric group S<sub>n</sub>. The optimiser walks it by transpositions (swapping two cards), which generate all of S<sub>n</sub>. Only adjacent pairs enter the set-win formula, so the objective is a sum of terms over consecutive cards. That makes it a travelling-salesman-style path problem on a graph whose edge weights are <span class="mono">d(a) − d(a ∪ b)</span>.</p>
+      <p><b>Lattice.</b> Card types live in the Boolean lattice 2<sup>F</sup> (union = join, intersection = meet). A match is a non-zero meet, or, read as 0/1 vectors, a non-zero dot product. Non-matching cards are <b>orthogonal</b> vectors on the hypercube {0,1}<sup>F</sup>.</p>
+    </div>
+    <div class="box"><h3>7 · Geometry: carving up colour space</h3>
+      <p>Naming a colour means cutting the RGB cube into regions. Below, the hue × lightness plane is coloured by the region each point falls in. Dots are real kit colours, which pile up on the region borders. That’s why the “min share” setting and the colour scheme change the odds so much.</p>
+      <canvas id="mGeo" width="560" height="260" style="width:100%;height:auto;border-radius:6px;border:1px solid var(--line)"></canvas>
+    </div>
+    <div class="box"><h3>8 · Sensitivity: how the colour rule changes the odds</h3>
+      <p>Small choices in how a shirt becomes a card colour change the game. In the every-colour variant, the cliff near 8–10% comes from collars and trims: below it, almost every shirt “has” white.</p>
+      <div id="mThresh"></div>
+    </div>
+  </div>
+</section>
+
+<!-- LEARN -->
+<section class="panel" id="p-learn" role="tabpanel" hidden>
+  <div class="box">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;background:var(--ink);color:var(--paper);border-radius:10px;padding:14px 16px;margin-bottom:14px"><div><b style="font:800 22px var(--f-display);text-transform:uppercase;letter-spacing:.02em">Shirt Match Academy</b><div class="small" style="opacity:.85">The full course: 19 chapters in 4 parts (probability, random processes, game theory, discrete maths), with labs, self-check questions and saved progress.</div></div><a class="btn" style="background:var(--flag);color:#15212b;border-color:var(--flag);text-decoration:none" href="course.html">Open the course →</a></div>
+    <h3>Learn the maths with one card game</h3>
+    <p>Fourteen short lessons. Each starts from something you can see at the table, explains the idea in plain words, shows it with a picture, lets you try it, and points to free resources if you want to go deeper. They build on each other, so going in order works best, but each one also stands alone.</p>
+    <nav id="lToc" class="chips" aria-label="Lessons"></nav>
+  </div>
+  <div id="lessons" style="display:grid;gap:24px;grid-template-columns:minmax(0,1fr)"></div>
+</section>
+
+<!-- DATA -->
+<section class="panel" id="p-data" role="tabpanel" hidden>
+  <div class="cols2">
+    <div class="box"><h3>Where the data comes from</h3>
+      <ul>
+        <li><b>Kits</b>: English Wikipedia infoboxes for clubs and national teams. Home, away and third kits, as body, sleeve and pattern colours, scraped on 17 Oct 2026.</li>
+        <li><b>Stripes and hoops</b>: about 16,000 kit pattern images from Wikimedia Commons, read pixel by pixel. Many striped shirts list only their base colour in the text.</li>
+        <li><b>Teams</b>: Wikidata for country, continent, league and fame (number of Wikipedia language editions).</li>
+        <li><b>History</b>: 2,012 season articles from 43 well-known clubs, 1880s–2020s.</li>
+      </ul>
+      <p class="small muted" id="dataCounts"></p>
+    </div>
+    <div class="box"><h3>Assumptions you can change</h3>
+      <p>All of them are set in the Deck tab, and the project defaults live in <span class="mono">config/assumptions.json</span>.</p>
+      <ul>
+        <li><b>Kit usage</b>: home 68%, away 24%, third 8% of matches. This is an estimate, because no database records the kit worn in every match. Per-team exact figures can go in <span class="mono">data/overrides/kit_usage_overrides.json</span>.</li>
+        <li><b>Matches per season</b>: clubs 38–48 depending on league level, national teams 10.</li>
+        <li><b>Fame weight</b>: Wikipedia language editions raised to a power, optionally keeping only the top N teams, as a card pack would.</li>
+        <li><b>Card colour</b>: the colour covering the largest share of the shirt (body 70%, sleeves 15% each, stripes measured from the kit images). Colours within 5 points of each other count as a tie, decided by the preset order. A variant where every colour covering ≥12% counts is available in the Deck tab.</li>
+      </ul>
+    </div>
+    <div class="box"><h3>Known gaps</h3>
+      <ul>
+        <li>Kits are the <b>current</b> season’s. The history sample covers 43 big clubs only, and national-team history isn’t included yet.</li>
+        <li>League labels come from Wikidata and can name a club’s former league.</li>
+        <li>Sleeve patterns (only the body pattern was analysed) and shorts and socks are ignored, since the game is about shirts.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+</div>
+
+<script src="engine.js"></script>
+<script>
+(async function(){
+const E = window.Engine;
+const $ = (s, r=document) => r.querySelector(s);
+const h = (tag, attrs={}, ...kids) => { const e=document.createElement(tag); for(const k in attrs){ if(k==='class') e.className=attrs[k]; else if(k==='html') e.innerHTML=attrs[k]; else if(k.startsWith('on')) e.addEventListener(k.slice(2),attrs[k]); else e.setAttribute(k,attrs[k]); } for(const c of kids.flat()){ if(c==null) continue; e.append(c.nodeType?c:document.createTextNode(c)); } return e; };
+const pct = (x,d=1) => (100*x).toFixed(d)+'%';
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const KIT = ['Home','Away','Third'];
+
+/* ---------- tabs ---------- */
+const TABS=[['rules','Rules'],['deck','Deck'],['explore','Explore data'],['dist','Distributions'],['vs','Play vs computer'],['play','Play & simulate'],['strategies','Strategies'],['math','Maths'],['learn','Learn the maths'],['data','Data & assumptions']];
+const nav=$('#tabs');
+function show(id){ for(const [t] of TABS){ $('#p-'+t).hidden = t!==id; const b=$('#tab-'+t); b.setAttribute('aria-selected', t===id); } try{ history.replaceState(null,'','#'+id);}catch(e){} if(id==='math') drawMath(); if(id==='explore') renderBreakdown(); if(id==='dist') renderDist(); if(id==='vs'){ if(!VS.st) vsNew(); else vsRender(); } if(id==='learn' && learnFor!==pool){ learnFor=pool; renderLearn(); } }
+for(const [t,l] of TABS) nav.append(h('button',{id:'tab-'+t,role:'tab','aria-selected':'false',onclick:()=>show(t)},l));
+
+/* ---------- load ---------- */
+const [data, defaults, pre] = await Promise.all(['teams.json','assumptions.json','results.json'].map(f=>fetch(f).then(r=>r.json())));
+const cfg = JSON.parse(JSON.stringify(defaults));
+let pool;
+
+/* ---------- shirts ---------- */
+let sid=0;
+const SHIRT='M13 5 L17 3 Q20 6 23 3 L27 5 L36 11 L32 17 L28 14 L28 37 L12 37 L12 14 L8 17 L4 11 Z';
+function shirtFromHex(cols){ // [[hex,share]]
+  const id='s'+(sid++); let x=4, parts='';
+  const tot=cols.reduce((s,c)=>s+c[1],0)||1;
+  for(const [hex,s] of cols){ const w=32*s/tot; parts+=`<rect x="${x.toFixed(2)}" y="0" width="${(w+0.3).toFixed(2)}" height="40" fill="#${hex}"/>`; x+=w; }
+  return `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="${id}"><path d="${SHIRT}"/></clipPath></defs><g clip-path="url(#${id})">${parts}</g><path d="${SHIRT}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1"/></svg>`;
+}
+function shirtFromMask(mask, scheme){ const n=E.maskNames(mask,scheme); return shirtFromHex(n.map(c=>[E.SWATCH[c].slice(1),1])); }
+const teamIndex = new Map(data.teams.map(t=>[t[0],t]));
+function cardEl(team, kit, mask){
+  const t=teamIndex.get(team); const cols = t && t[10][kit];
+  return h('div',{class:'cardx',html: cols? shirtFromHex(cols): shirtFromMask(mask,cfg.colour.scheme)},
+    h('div',{class:'t'},team.replace(/ national (association )?football team/i,'').replace(/ F\.C\.$| FC$|^FC /,'')),
+    h('div',{class:'k'},KIT[kit]+' · '+E.maskNames(mask,cfg.colour.scheme).join(' + ')));
+}
+
+/* ---------- rules diagram ---------- */
+(function(){
+  const W=560,H=150, xs=i=>40+i*70; let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px" role="img" aria-label="Alternating cards A1 B1 A2 B2 with comparison arrows">`;
+  s+=`<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>`;
+  const seq=['A1','B1','A2','B2','A3','B3','A4'];
+  seq.forEach((c,i)=>{ const isA=c[0]==='A'; s+=`<rect x="${xs(i)-22}" y="52" width="44" height="56" rx="6" fill="${isA?'var(--accent)':'var(--flag)'}"/><text x="${xs(i)}" y="86" text-anchor="middle" font-size="18" font-weight="700" style="fill:${isA?'var(--accent-ink)':'#15212b'}">${c}</text>`; });
+  for(let i=1;i<seq.length;i++){ const winner=seq[i][0]; const y= i%2? 40:122; s+=`<path d="M${xs(i-1)} ${i%2?50:110} Q${(xs(i-1)+xs(i))/2} ${i%2?18:142} ${xs(i)} ${i%2?50:110}" fill="none" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#ar)"/><text x="${(xs(i-1)+xs(i))/2}" y="${i%2?26:146}" text-anchor="middle" font-size="12">${winner} wins</text>`; }
+  s+=`<text x="${xs(0)-22}" y="14" font-size="11" style="fill:var(--muted)">A1 opens: it can only be hit</text></svg>`;
+  $('#rulesDiagram').innerHTML=s;
+})();
+
+/* ---------- controls ---------- */
+const CONFEDS=['UEFA','CONMEBOL','CONCACAF','CAF','AFC','OFC'];
+function slider(label,get,set,min,max,step,fmt){ const out=h('span',{class:'mono small'}); const inp=h('input',{type:'range',min,max,step,value:get(),id:'sl-'+label.replace(/\W/g,''),'aria-label':label}); const upd=()=>{ out.textContent=fmt(+inp.value); }; inp.addEventListener('input',()=>{ set(+inp.value); upd(); schedule(); }); upd(); return h('div',{}, h('label',{class:'row'},label,out), inp); }
+function check(label,get,set){ const i=h('input',{type:'checkbox',id:'ck-'+label.replace(/\W/g,'')}); i.checked=get(); i.addEventListener('change',()=>{ set(i.checked); schedule(); }); return h('label',{class:'chk'},i,label); }
+function buildControls(){
+  const c=$('#controls'); c.innerHTML='';
+  const sch=h('select',{id:'scheme'},h('option',{value:'basic'},'Basic (navy and sky count as blue)'),h('option',{value:'detailed'},'Detailed (navy, sky, claret are separate)')); sch.value=cfg.colour.scheme; sch.onchange=()=>{cfg.colour.scheme=sch.value; schedule();};
+  const rule=h('select',{id:'rule'},h('option',{value:'dominant'},'One colour per card: the biggest one (game rule)'),h('option',{value:'all'},'Variant: every colour on the shirt counts')); rule.value=cfg.colour.rule||'dominant'; rule.onchange=()=>{cfg.colour.rule=rule.value; buildControls(); schedule();};
+  const fs=h('fieldset',{},h('legend',{},'Colours'), rule, sch);
+  if((cfg.colour.rule||'dominant')==='dominant'){
+    fs.append(slider('Count as a tie within',()=>cfg.colour.tie_tolerance??0.05,v=>cfg.colour.tie_tolerance=v,0,0.3,0.01,v=>v?pct(v,0)+' points':'exact only'));
+    const pri=cfg.colour.tie_priority||E.DEFAULT_PRIORITY.slice(); cfg.colour.tie_priority=pri;
+    const shown=pri.filter(f=>E.SCHEMES[cfg.colour.scheme].includes(f)); const box=h('div',{class:'chips',style:'gap:4px'});
+    shown.forEach((f,i)=>{ box.append(h('span',{class:'chip',style:'display:inline-flex;gap:4px;align-items:center;padding:2px 6px'},h('span',{class:'sw',style:`width:12px;height:12px;background:${E.SWATCH[f]}`}),(i+1)+'. '+f,
+      i>0?h('button',{class:'chip',style:'padding:0 5px;font-size:11px','aria-label':'move '+f+' earlier',onclick:()=>{ const a=pri.indexOf(f), b=pri.indexOf(shown[i-1]); [pri[a],pri[b]]=[pri[b],pri[a]]; buildControls(); schedule(); }},'◀'):null)); });
+    fs.append(h('div',{class:'small'},'Tie-break order (first wins a tie):'),box);
+  } else fs.append(slider('Colour must cover',()=>cfg.colour.min_share,v=>cfg.colour.min_share=v,0.02,0.5,0.01,v=>pct(v,0)+' of shirt'));
+  c.append(fs);
+  c.append(h('fieldset',{},h('legend',{},'Kit usage (share of matches)'),
+    slider('Home',()=>cfg.kit_usage.home,v=>cfg.kit_usage.home=v,0,1,0.01,v=>pct(v,0)),
+    slider('Away',()=>cfg.kit_usage.away,v=>cfg.kit_usage.away=v,0,1,0.01,v=>pct(v,0)),
+    slider('Third',()=>cfg.kit_usage.third,v=>cfg.kit_usage.third=v,0,1,0.01,v=>pct(v,0)),
+    h('p',{class:'small muted'},'These are relative weights, so they don’t need to add up to 100%.')));
+  c.append(h('fieldset',{},h('legend',{},'Fame weighting'),
+    check('Weight teams by fame',()=>cfg.popularity.enabled,v=>cfg.popularity.enabled=v),
+    slider('Fame exponent',()=>cfg.popularity.exponent,v=>cfg.popularity.exponent=v,0,3,0.1,v=>'^'+v.toFixed(1)),
+    slider('Only the most famous',()=>cfg.popularity.top_n,v=>cfg.popularity.top_n=v,0,3000,50,v=>v? 'top '+v+' teams':'all teams')));
+  const chips=h('div',{class:'chips'}); for(const cf of CONFEDS){ const b=h('button',{class:'chip','aria-pressed':String(cfg.deck_population.confederations.includes(cf))},cf); b.onclick=()=>{ const L=cfg.deck_population.confederations; const i=L.indexOf(cf); if(i>=0) L.splice(i,1); else L.push(cf); b.setAttribute('aria-pressed',String(i<0)); schedule(); }; chips.append(b); }
+  c.append(h('fieldset',{},h('legend',{},'Who is in the deck'),
+    check('Clubs',()=>cfg.deck_population.clubs,v=>cfg.deck_population.clubs=v),
+    check('National teams',()=>cfg.deck_population.national,v=>cfg.deck_population.national=v),
+    check('Women’s teams',()=>cfg.deck_population.women,v=>cfg.deck_population.women=v),
+    check('Youth, futsal & other',()=>cfg.deck_population.youth_other,v=>cfg.deck_population.youth_other=v),
+    check('Non-FIFA national teams',()=>cfg.deck_population.non_fifa_national,v=>cfg.deck_population.non_fifa_national=v), chips));
+  c.append(h('button',{class:'btn ghost',onclick:()=>{ Object.assign(cfg, JSON.parse(JSON.stringify(defaults))); buildControls(); schedule(); }},'Reset to project defaults'));
+}
+let tmr=null; function schedule(){ clearTimeout(tmr); tmr=setTimeout(recompute,120); }
+
+/* ---------- deck tab ---------- */
+let pEnd=null;
+function recompute(){
+  pool=E.buildPool(data,cfg);
+  if(!pool.entries.length){ $('#kpis').innerHTML='<p>No team matches these settings. Switch something back on.</p>'; return; }
+  const q=E.matchProbability(pool);
+  pEnd=E.setLengthLaw(pool,60);
+  const second=pEnd.reduce((s,p,L)=>s+(L%2===0?p:0),0);
+  const avgC=[...pool.masks].reduce((s,[m,p])=>s+p*E.popcount(m),0);
+  $('#kpis').innerHTML=''; for(const [v,l] of [[pool.teams.toLocaleString(),'teams in the pool'],[pct(q),'chance two random cards match'],[(cfg.colour.rule||'dominant')==='dominant'?(1/[...pool.masks.values()].reduce((s,p)=>s+p*p,0)).toFixed(1):avgC.toFixed(2),(cfg.colour.rule||'dominant')==='dominant'?'effective number of colours (1 / Σp²)':'colours per shirt, on average'],[pct(second),'chance the second player wins a set']]) $('#kpis').append(h('div',{class:'kpi'},h('div',{class:'v'},v),h('div',{class:'l'},l)));
+  const fr=E.familyFrequencies(pool).sort((a,b)=>b.p-a.p); const fb=$('#freqBars'); fb.innerHTML='';
+  for(const f of fr){ if(f.p<0.001) continue; fb.append(h('div',{class:'bar'},h('span',{class:'sw',style:`background:${E.SWATCH[f.name]}`}),h('span',{},f.name),h('div',{class:'track'},h('div',{class:'fill',style:`width:${(100*f.p/fr[0].p).toFixed(1)}%`})),h('span',{class:'mono small'},pct(f.p)))); }
+  const tc=$('#topCombos'); tc.innerHTML='';
+  for(const [m,p] of [...pool.masks].sort((a,b)=>b[1]-a[1]).slice(0,12)) tc.append(h('div',{class:'cardx',html:shirtFromMask(m,pool.scheme)},h('div',{class:'t'},E.maskNames(m,pool.scheme).join(' + ')),h('div',{class:'k mono'},pct(p))));
+  deal(); renderHeadline(q,second);
+  if(!$('#p-explore').hidden) renderBreakdown();
+  if(!$('#p-math').hidden) drawMath();
+  if(!$('#p-strategies').hidden) renderStrategyCards();
+  if(!$('#p-dist').hidden) renderDist();
+  if(!$('#p-learn').hidden){ learnFor=pool; renderLearn(); }
+}
+function deal(){ const R=E.rng((Math.random()*1e9)|0), draw=E.sampler(pool), g=$('#sampleDeck'); g.innerHTML=''; for(let i=0;i<40;i++){ const e=draw(R); g.append(cardEl(e.team,e.kit,e.mask)); } }
+$('#redeal').onclick=deal;
+
+/* ---------- explore ---------- */
+function groupPool(filterFn, opts={}){
+  const c=JSON.parse(JSON.stringify(cfg)); c.popularity.top_n=0; c.deck_population.confederations=[]; Object.assign(c.deck_population, opts);
+  return E.buildPool({...data, teams:data.teams.filter(filterFn)}, c);
+}
+function stackBar(p){ const fr=E.familyFrequencies(p).filter(f=>f.p>0.005).sort((a,b)=>b.p-a.p); const tot=fr.reduce((s,f)=>s+f.p,0); return h('div',{class:'stack',title:fr.map(f=>f.name+' '+pct(f.p)).join(', ')}, ...fr.map(f=>h('span',{style:`width:${(100*f.p/tot).toFixed(2)}%;background:${E.SWATCH[f.name]}`}))); }
+function renderBreakdown(){
+  if(!pool) return;
+  const dim=$('#dim').value, C=data.confederations, rows=[];
+  const add=(name,p,extra='')=>{ if(p.entries.length) rows.push({name,p,q:E.matchProbability(p),extra}); };
+  const conf=t=>t[5]>=0?C[t[5]]:null;
+  if(dim==='confed-c'||dim==='confed-n'){ const typ=dim==='confed-c'?'c':'n'; for(const cf of CONFEDS) add(cf, groupPool(t=>t[1]===typ&&conf(t)===cf&&t[2]==='m',{clubs:true,national:true,women:false,youth_other:false})); }
+  else if(dim==='league'){ const fame={}; for(const t of data.teams) if(t[1]==='c'&&t[2]==='m'&&t[6]>=0){ const l=data.leagues[t[6]]; fame[l]=(fame[l]||0)+t[8]; }
+    for(const l of Object.entries(fame).sort((a,b)=>b[1]-a[1]).slice(0,30).map(x=>x[0])){ const li=data.leagues.indexOf(l); const p=groupPool(t=>t[6]===li&&t[2]==='m',{clubs:true,national:false}); if(p.teams>=8) add(l,p); } }
+  else if(dim==='country'){ const fame={}; for(const t of data.teams) if(t[3]>=0&&t[2]==='m'){ const c=data.countries[t[3]]; fame[c]=(fame[c]||0)+t[8]; }
+    for(const c of Object.entries(fame).sort((a,b)=>b[1]-a[1]).slice(0,30).map(x=>x[0])){ const ci=data.countries.indexOf(c); add(c, groupPool(t=>t[3]===ci&&t[2]==='m',{clubs:true,national:true})); } }
+  else if(dim==='decade'){ for(let d=1880; d<=2020; d+=10){ const p=E.buildHistoryPool(data,cfg,d,d+9); add(d+'s',p, data.history.filter(x=>x[1]>=d&&x[1]<d+10).length+' seasons'); } }
+  else { add('Men’s clubs',groupPool(t=>t[1]==='c'&&t[2]==='m',{clubs:true,national:true})); add('Men’s national teams',groupPool(t=>t[1]==='n'&&t[2]==='m',{clubs:true,national:true}));
+         add('Women’s clubs',groupPool(t=>t[1]==='c'&&t[2]==='w',{clubs:true,national:true,women:true})); add('Women’s national teams',groupPool(t=>t[1]==='n'&&t[2]==='w',{clubs:true,national:true,women:true,non_fifa_national:true})); }
+  const T=$('#breakdown'); T.innerHTML=''; const maxq=Math.max(...rows.map(r=>r.q),0.01);
+  T.append(h('tr',{},h('th',{},'Group'),h('th',{},dim==='decade'?'Seasons':'Teams'),h('th',{},'Match chance'),h('th',{},'Colour mix'),h('th',{},'Commonest shirt')));
+  for(const r of rows){ const top=[...r.p.masks].sort((a,b)=>b[1]-a[1])[0];
+    T.append(h('tr',{},h('td',{},r.name),h('td',{class:'mono'},r.extra||r.p.teams),h('td',{},h('div',{class:'pbar'},h('span',{class:'mono small',style:'width:48px'},pct(r.q,0)),h('div',{class:'track'},h('div',{class:'fill',style:`width:${(100*r.q/maxq).toFixed(1)}%`})))),h('td',{},stackBar(r.p)),h('td',{class:'small'},E.maskNames(top[0],r.p.scheme).join(' + ')+' · '+pct(top[1],0)))); }
+}
+$('#dim').onchange=renderBreakdown;
+$('#teamQ').addEventListener('input',()=>{ const q=$('#teamQ').value.trim().toLowerCase(), out=$('#teamOut'); out.innerHTML=''; if(q.length<2) return;
+  const hits=data.teams.filter(t=>t[0].toLowerCase().includes(q)).sort((a,b)=>b[8]-a[8]).slice(0,8);
+  if(!hits.length){ out.append(h('p',{class:'muted'},'No team found. Try the Wikipedia article name.')); return; }
+  for(const t of hits){ const row=h('div',{style:'display:flex;gap:10px;flex-wrap:wrap;align-items:center'}); row.append(h('div',{style:'min-width:200px;flex:1'},h('b',{},t[0]),h('div',{class:'small muted'},[t[3]>=0?data.countries[t[3]]:'', t[6]>=0?data.leagues[t[6]]:'', t[8]+' Wikipedia editions'].filter(Boolean).join(' · '))));
+    t[10].forEach((k,i)=>{ if(k){ const m=E.kitMask(k,cfg.colour.scheme,cfg.colour.min_share,cfg.colour); row.append(h('div',{class:'cardx',style:'width:100px',html:shirtFromHex(k)},h('div',{class:'k'},KIT[i]),h('div',{class:'small'},E.maskNames(m,cfg.colour.scheme).join(' + ')||'(no main colour)'))); } });
+    out.append(row); } });
+
+/* ---------- play ---------- */
+const SN=Object.keys(E.STRATEGIES);
+for(const s of ['#sa','#sb']) for(const n of SN) $(s).append(h('option',{value:n},E.STRATEGIES[n].label));
+$('#sa').value='counter'; $('#sb').value='random';
+let worker=null; function getWorker(){ if(!worker) worker=new Worker('worker.js'); return worker; }
+function poolMsg(){ return {entries:pool.entries.map(e=>({team:e.team,kit:e.kit,mask:e.mask,p:e.p})), masks:pool.masks, F:pool.F, scheme:pool.scheme}; }
+function runWorker(msg, progEl, onDone){ const w=getWorker(); w.onmessage=(ev)=>{ const d=ev.data; if(d.type==='progress'){ progEl.style.width=(100*d.done/d.total).toFixed(1)+'%'; } else { progEl.style.width='100%'; onDone(d); } }; w.postMessage(msg); }
+$('#runMatch').onclick=()=>{ const b=$('#runMatch'); b.disabled=true; $('#prog1').style.width='0';
+  runWorker({cmd:'matchup',pool:poolMsg(),games:+$('#nGames').value,deckSize:+$('#deckSize').value,names:[$('#sa').value,$('#sb').value],seed:(Math.random()*1e9)|0}, $('#prog1'), (d)=>{ b.disabled=false;
+    const n=d.w+d.l+d.d, wr=(d.w+0.5*d.d)/n, se=Math.sqrt(wr*(1-wr)/n); const mean=d.sets.reduce((a,b)=>a+b,0)/n; const sorted=d.sets.slice().sort((a,b)=>a-b);
+    const o=$('#matchOut'); o.innerHTML='';
+    o.append(h('div',{class:'kpis'},h('div',{class:'kpi'},h('div',{class:'v'},pct(wr)),h('div',{class:'l'},E.STRATEGIES[d.a].label+' win rate ±'+pct(1.96*se))),h('div',{class:'kpi'},h('div',{class:'v'},mean.toFixed(0)),h('div',{class:'l'},'sets per game (median '+sorted[n>>1]+')'))));
+    if(d.d) o.append(h('p',{class:'small muted'},d.d+' games hit the 3,000-set limit and count as draws.'));
+    const tot=d.setLens.reduce((a,b)=>a+b,0); o.append(h('p',{class:'small',style:'margin-top:8px'},'How many cards a set lasts:'), barChart(d.setLens.map((v,i)=>[i===20?'20+':String(i),v/tot]).slice(2),{h:140,fmt:x=>pct(x,0)})); }); };
+$('#runTrace').onclick=()=>{ runWorker({cmd:'trace',pool:poolMsg(),deckSize:+$('#deckSize').value,names:[$('#sa').value,$('#sb').value],seed:(Math.random()*1e9)|0}, $('#prog1'), (d)=>{
+  const o=$('#traceOut'); o.innerHTML=''; const A=E.STRATEGIES[$('#sa').value].label, B=E.STRATEGIES[$('#sb').value].label;
+  const res=d.result; o.append(h('p',{},h('b',{},res.winner===0?A+' (A) wins':res.winner===1?B+' (B) wins':'Draw (set limit)'),' after '+res.sets+' sets.'));
+  const N=+$('#deckSize').value; o.append(lineChart([{pts:[[0,N/2],...d.trace.map((s,i)=>[i+1,s.after?s.after[0]:(s.ranOut===0?0:N)])],color:css('--accent')}],{h:170,ymin:0,ymax:N,xlabel:'set',ylabel:'A’s cards'}));
+  const log=h('div',{class:'playlog'}); d.trace.slice(0,12).forEach((s,i)=>{ const row=h('div',{class:'setrow'},h('span',{class:'mono small',style:'width:52px'},'Set '+(i+1))); s.plays.forEach(([p,id])=>{ const c=d.cards[id]; const t=teamIndex.get(c.team); const span=h('span',{title:c.team+' '+KIT[c.kit]+' ('+(p?'B':'A')+')',style:`display:inline-flex;border-bottom:3px solid ${p?css('--flag'):css('--accent')}`,html:t&&t[10][c.kit]?shirtFromHex(t[10][c.kit]):shirtFromMask(c.mask,pool.scheme)}); row.append(span); }); row.append(h('span',{class:'tag '+(s.winner===0?'a':'b')},s.winner===0?'A takes '+s.plays.length:s.winner===1?'B takes '+s.plays.length:'ran out')); log.append(row); });
+  o.append(h('p',{class:'small muted',style:'margin-top:8px'},'The first 12 sets. Underline colour shows who laid each card (green A, yellow B). Hover a shirt for the team.'), log); }); };
+
+const tSel=new Set(SN); const tc=$('#tStrats'); for(const n of SN){ const b=h('button',{class:'chip','aria-pressed':'true'},E.STRATEGIES[n].label); b.onclick=()=>{ if(tSel.has(n)) tSel.delete(n); else tSel.add(n); b.setAttribute('aria-pressed',String(tSel.has(n))); }; tc.append(b); }
+function renderTournament(T, note){
+  const n=T.names.length, avg=T.winRate.map(r=>r.reduce((a,b)=>a+b,0)/n), order=T.names.map((_,i)=>i).sort((a,b)=>avg[b]-avg[a]);
+  const tbl=h('table',{class:'heat'}); const hr=h('tr',{},h('th',{},'row beats column →')); for(const j of order) hr.append(h('th',{class:'rot'},h('div',{},E.STRATEGIES[T.names[j]].label))); hr.append(h('th',{},'avg')); tbl.append(hr);
+  for(const i of order){ const tr=h('tr',{},h('th',{style:'text-align:right'},E.STRATEGIES[T.names[i]].label)); for(const j of order){ const v=T.winRate[i][j]; const a=Math.min(1,Math.abs(v-0.5)*2.4); const col=v>=0.5?css('--good'):css('--bad'); tr.append(h('td',{style:`background:color-mix(in srgb, ${col} ${(a*85).toFixed(0)}%, transparent)`,title:pct(v)},i===j?'·':(100*v).toFixed(0))); } tr.append(h('td',{style:'font-weight:700'},(100*avg[i]).toFixed(0))); tbl.append(tr); }
+  $('#tOut').innerHTML=''; $('#tOut').append(tbl); $('#tNote').textContent=note;
+}
+$('#runTourn').onclick=()=>{ const names=SN.filter(n=>tSel.has(n)); if(names.length<2) return; const b=$('#runTourn'); b.disabled=true; $('#prog2').style.width='0';
+  runWorker({cmd:'tournament',pool:poolMsg(),games:+$('#tGames').value,deckSize:+$('#deckSize').value,names,seed:(Math.random()*1e9)|0}, $('#prog2'), (d)=>{ b.disabled=false; renderTournament(d,`Your run: ${d.games} games per pairing, ${d.deckSize}-card decks, current Deck settings. Numbers are % of games the row strategy wins.`); }); };
+
+/* ---------- charts ---------- */
+function barChart(pairs,{h:H=160,fmt=x=>x.toFixed(2)}={}){ const W=520, pad=28, bw=(W-pad*2)/pairs.length, mx=Math.max(...pairs.map(p=>p[1]))||1;
+  let s=`<svg viewBox="0 0 ${W} ${H+30}" width="100%">`; s+=`<line class="axis" x1="${pad}" y1="${H}" x2="${W-pad}" y2="${H}"/>`;
+  pairs.forEach(([l,v],i)=>{ const bh=(H-20)*v/mx, x=pad+i*bw; s+=`<rect x="${(x+2).toFixed(1)}" y="${(H-bh).toFixed(1)}" width="${(bw-4).toFixed(1)}" height="${bh.toFixed(1)}" fill="var(--accent)" rx="2"/><text x="${(x+bw/2).toFixed(1)}" y="${H+14}" text-anchor="middle" font-size="11">${l}</text>`; if(v/mx>0.12) s+=`<text x="${(x+bw/2).toFixed(1)}" y="${(H-bh-4).toFixed(1)}" text-anchor="middle" font-size="10" style="fill:var(--muted)">${fmt(v)}</text>`; });
+  return h('div',{class:'scroll',html:s+'</svg>'}); }
+function lineChart(series,{h:H=180,ymin=0,ymax=1,xlabel='',ylabel='',yfmt=v=>v}={}){ const W=520, L=44, Rr=12, T=10, B=28; const xs=series.flatMap(s=>s.pts.map(p=>p[0])); const x0=Math.min(...xs), x1=Math.max(...xs)||1;
+  const X=x=>L+(W-L-Rr)*(x-x0)/((x1-x0)||1), Y=y=>T+(H-T-B)*(1-(y-ymin)/((ymax-ymin)||1));
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`; for(let k=0;k<=4;k++){ const yv=ymin+(ymax-ymin)*k/4; s+=`<line class="gridl" x1="${L}" x2="${W-Rr}" y1="${Y(yv)}" y2="${Y(yv)}"/><text x="${L-6}" y="${Y(yv)+4}" text-anchor="end" font-size="10" style="fill:var(--muted)">${yfmt(+yv.toFixed(2))}</text>`; }
+  s+=`<text x="${W-Rr}" y="${H-6}" text-anchor="end" font-size="11" style="fill:var(--muted)">${xlabel}: ${+(+x0).toFixed(2)} → ${+(+x1).toFixed(2)}</text><text x="${L}" y="${T+2}" font-size="11" style="fill:var(--muted)" dx="6" dy="8">${ylabel}</text>`;
+  for(const sr of series){ s+=`<polyline fill="none" stroke="${sr.color}" stroke-width="${sr.w||2}" ${sr.dash?'stroke-dasharray="4 4"':''} points="${sr.pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ')}"/>`; }
+  const leg=series.filter(sr=>sr.label).map(sr=>`<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px"><span style="width:16px;height:3px;background:${sr.color};display:inline-block"></span>${sr.label}</span>`).join('');
+  return h('div',{class:'scroll',html:s+'</svg>'+(leg?`<div class="small" style="margin-top:4px">${leg}</div>`:'')}); }
+
+/* ---------- maths tab ---------- */
+function drawMath(){
+  if(!pool) return;
+  const q=E.matchProbability(pool), second=pEnd.reduce((s,p,L)=>s+(L%2===0?p:0),0);
+  $('#mProb').innerHTML=''; $('#mProb').append(h('p',{},'With the current deck: ', h('b',{},'P(match) = '+pct(q)),'. If each comparison were an independent coin flip, the second player would win a set with probability 1/(2 − q) = '+pct(1/(2-q))+'. The exact Markov answer is '+pct(second)+'. The gap exists because consecutive comparisons share a card.'));
+  $('#mSetLen').innerHTML=''; $('#mSetLen').append(barChart(pEnd.slice(2,16).map((v,i)=>[String(i+2),v]),{h:150,fmt:x=>pct(x,0)}), h('p',{class:'small'},'Second player wins a set: ',h('b',{},pct(second)),'. Mean set length: '+pEnd.reduce((s,p,L)=>s+p*L,0).toFixed(2)+' cards. Because the winner must start the next set, a lead tends to slow itself down.'));
+  const N=+$('#deckSize').value||40, ch=E.cardChain(pEnd,N);
+  $('#mChain').innerHTML=''; $('#mChain').append(lineChart([{pts:ch.map(r=>[r.k,r.k/N]),color:css('--muted'),dash:true,label:'k/N'},{pts:ch.map(r=>[r.k,r.winIfStarter]),color:css('--accent'),label:'P(A wins), A starts'}],{h:170,xlabel:'A’s cards k',ylabel:'P(A wins game)',yfmt:v=>pct(v,0)}),
+    lineChart([{pts:ch.map(r=>[r.k,r.setsIfStarter]),color:css('--flag'),label:'expected sets left'}],{h:150,ymin:0,ymax:Math.max(...ch.map(r=>r.setsIfStarter))*1.05,xlabel:'A’s cards k',ylabel:'sets',yfmt:v=>Math.round(v)}),
+    h('p',{class:'small'},'With an even split of '+N+' cards and random play, a game lasts on average ',h('b',{},ch[N/2-1].setsIfStarter.toFixed(0)+' sets'),'.'));
+  // graph
+  const G=E.colourGraph(pool), names=G.names, F=names.length, freq=names.map((_,i)=>G.co[i][i]); const idx=names.map((_,i)=>i).filter(i=>freq[i]>0.003);
+  const W=420,Hh=360,cx=W/2,cy=Hh/2,rad=140; const pos={}; idx.forEach((i,k)=>{ const a=-Math.PI/2+2*Math.PI*k/idx.length; pos[i]=[cx+rad*Math.cos(a),cy+rad*Math.sin(a)]; });
+  let s=`<svg viewBox="0 0 ${W} ${Hh}" width="100%" style="max-width:460px">`; const maxe=Math.max(...idx.flatMap(i=>idx.filter(j=>j!==i).map(j=>G.co[i][j])));
+  for(const i of idx) for(const j of idx) if(i<j&&G.co[i][j]>0.002){ s+=`<line x1="${pos[i][0]}" y1="${pos[i][1]}" x2="${pos[j][0]}" y2="${pos[j][1]}" stroke="var(--muted)" stroke-opacity="${(0.25+0.6*G.co[i][j]/maxe).toFixed(2)}" stroke-width="${(1+14*G.co[i][j]/maxe).toFixed(1)}"/>`; }
+  const mf=Math.max(...freq); for(const i of idx){ const r=8+26*Math.sqrt(freq[i]/mf); s+=`<circle cx="${pos[i][0]}" cy="${pos[i][1]}" r="${r.toFixed(1)}" fill="${E.SWATCH[names[i]]}" stroke="var(--ink)" stroke-width="1"/><text x="${pos[i][0]}" y="${pos[i][1]+r+13}" text-anchor="middle" font-size="12">${names[i]} ${pct(freq[i],0)}</text>`; }
+  $('#mGraph').innerHTML=s+'</svg>';
+  // matrix
+  const top=[...pool.masks].sort((a,b)=>b[1]-a[1]).slice(0,12); const K=top.map(([a])=>top.map(([b])=>(a&b)?1:0));
+  let v=top.map(()=>1); for(let it=0;it<300;it++){ const w=K.map(r=>r.reduce((s2,x,j)=>s2+x*v[j],0)); const nr=Math.hypot(...w)||1; v=w.map(x=>x/nr); } const lam=K.map(r=>r.reduce((s2,x,j)=>s2+x*v[j],0)).reduce((s2,x,i)=>s2+x*v[i],0);
+  const tb=h('table',{class:'heat'}); const hr=h('tr',{},h('th',{})); top.forEach(([m])=>hr.append(h('th',{html:shirtFromMask(m,pool.scheme).replace('<svg','<svg width="22" height="22"')}))); hr.append(h('th',{},'Perron')); tb.append(hr);
+  top.forEach(([m,p],i)=>{ const tr=h('tr',{},h('th',{style:'text-align:right;font-size:11px'},E.maskNames(m,pool.scheme).join('+')+' '+pct(p,0))); K[i].forEach(x=>tr.append(h('td',{style:`background:${x?'color-mix(in srgb, var(--accent) 70%, transparent)':'transparent'}`},x?'1':'0'))); tr.append(h('td',{},v[i].toFixed(2))); tb.append(tr); });
+  $('#mMatrix').innerHTML=''; $('#mMatrix').append(tb, h('p',{class:'small'},'Largest eigenvalue λ = '+lam.toFixed(2)+'. '+((cfg.colour.rule||'dominant')==='dominant'?'With one colour per card, K is the identity matrix (a card only matches its own colour), so pᵀKp is just Σp², the “collision probability”. Switch the Deck tab to the every-colour variant to see a richer matrix.':'Two-colour shirts sit at the centre: they connect two colour “communities”.')));
+  drawGeo();
+  // threshold curve
+  if((cfg.colour.rule||'dominant')==='dominant'){
+    const tp=[0,0.02,0.04,0.06,0.08,0.1,0.15,0.2,0.3].map(t=>{ const c=JSON.parse(JSON.stringify(cfg)); c.colour.tie_tolerance=t; const pb=E.buildPool(data,c); c.colour.tie_priority=['white','black','grey','red','blue','green','yellow','orange','purple','pink','claret','navy','sky','brown']; const pw=E.buildPool(data,c); return [t,E.matchProbability(pb),E.matchProbability(pw)]; });
+    $('#mThresh').innerHTML=''; $('#mThresh').append(h('p',{class:'small'},'With one colour per card, what matters is how ties are settled. Here the match chance is plotted against how close two shares must be to count as a tie, for two tie-break orders.'),lineChart([{pts:tp.map(p=>[Math.round(p[0]*100),p[1]]),color:css('--accent'),label:'ties → strong colours first (default)'},{pts:tp.map(p=>[Math.round(p[0]*100),p[2]]),color:css('--flag'),label:'ties → white/black first'}],{h:180,xlabel:'tie window (points)',ylabel:'P(match)',yfmt:v=>pct(v,0)}));
+    return;
+  }
+  const pts=[0.04,0.06,0.08,0.09,0.1,0.11,0.12,0.14,0.17,0.2,0.25,0.3,0.4,0.5].map(t=>{ const c=JSON.parse(JSON.stringify(cfg)); c.colour.min_share=t; const pb=E.buildPool(data,c); c.colour.scheme='detailed'; const pd=E.buildPool(data,c); return [t,E.matchProbability(pb),E.matchProbability(pd)]; });
+  $('#mThresh').innerHTML=''; $('#mThresh').append(lineChart([{pts:pts.map(p=>[Math.round(p[0]*100),p[1]]),color:css('--accent'),label:'basic'},{pts:pts.map(p=>[Math.round(p[0]*100),p[2]]),color:css('--flag'),label:'detailed'}],{h:180,xlabel:'min share %',ylabel:'P(match)',yfmt:v=>pct(v,0)}));
+}
+function drawGeo(){
+  const cv=$('#mGeo'), ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+  const hsl2hex=(hh,s,l)=>{ const k=n=>(n+hh/30)%12, a=s*Math.min(l,1-l), f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1)); return [f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join(''); };
+  const img=ctx.createImageData(W,H);
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const hh=360*x/W, l=1-y/H; const fam=E.familyOf(hsl2hex(hh,0.85,l),cfg.colour.scheme); const c=E.SWATCH[fam]; const i=4*(y*W+x); img.data[i]=parseInt(c.slice(1,3),16); img.data[i+1]=parseInt(c.slice(3,5),16); img.data[i+2]=parseInt(c.slice(5,7),16); img.data[i+3]=255; }
+  ctx.putImageData(img,0,0);
+  // dots: real kit colours (sample)
+  ctx.fillStyle='rgba(255,255,255,.9)'; ctx.strokeStyle='rgba(0,0,0,.7)';
+  let n=0; for(const t of data.teams){ if(t[8]<25) continue; for(const k of t[10]) if(k) for(const [hex,s] of k){ if(s<0.12) continue; const r=parseInt(hex.slice(0,2),16)/255,g=parseInt(hex.slice(2,4),16)/255,b=parseInt(hex.slice(4,6),16)/255; const mx=Math.max(r,g,b),mn=Math.min(r,g,b),c=mx-mn,l=(mx+mn)/2; if(c<0.12) continue; let hh= mx===r?60*(((g-b)/c)%6): mx===g?60*((b-r)/c+2):60*((r-g)/c+4); if(hh<0) hh+=360; ctx.beginPath(); ctx.arc(W*hh/360,H*(1-l),2.2,0,7); ctx.fill(); ctx.stroke(); if(++n>4000) break; } }
+  ctx.fillStyle='rgba(0,0,0,.6)'; ctx.font='12px sans-serif'; ctx.fillText('hue →',W-46,H-6); ctx.save(); ctx.translate(12,60); ctx.rotate(-Math.PI/2); ctx.fillText('lightness →',0,0); ctx.restore();
+}
+
+
+let learnFor=null;
+/* ---------- learn tab ---------- */
+const W_ = (t) => 'https://en.wikipedia.org/wiki/' + t;
+function topTypes(n) { return [...pool.masks].sort((a, b) => b[1] - a[1]).slice(0, n); }
+function typeName(m) { return E.maskNames(m, pool.scheme).join(' + '); }
+function typeSelect(id, n, def) {
+  const s = h('select', { id }); topTypes(n).forEach(([m, p]) => s.append(h('option', { value: m }, typeName(m) + ' (' + pct(p, 0) + ')')));
+  if (def != null) s.value = String(def); return s;
+}
+function lessonBox(L, i) {
+  const box = h('article', { class: 'box', id: 'lesson-' + L.id, style: 'display:grid;gap:14px;scroll-margin-top:70px;min-width:0;grid-template-columns:minmax(0,1fr)' });
+  box.append(h('div', { style: 'display:flex;gap:12px;align-items:baseline;flex-wrap:wrap' },
+    h('span', { class: 'tag a' }, 'Lesson ' + (i + 1)), h('h3', { style: 'margin:0' }, L.title), h('span', { class: 'small muted' }, L.topic)));
+  const cols = h('div', { class: 'cols2', style: 'gap:18px' });
+  const left = h('div', { style: 'display:grid;gap:10px;min-width:0;grid-template-columns:minmax(0,1fr)' });
+  left.append(h('div', {}, h('div', { class: 'small', style: 'font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)' }, 'In plain words'), h('p', { html: L.plain })));
+  left.append(h('div', { style: 'background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px' }, h('div', { class: 'small', style: 'font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)' }, 'At the table'), h('p', { style: 'margin:0', html: L.game })));
+  if (L.formula) left.append(h('div', {}, h('div', { class: 'small', style: 'font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px' }, 'The maths'), h('div', { class: 'formula' }, L.formula), L.formulaNote ? h('p', { class: 'small', style: 'margin-top:6px', html: L.formulaNote }) : null));
+  const right = h('div', { style: 'display:grid;gap:10px;min-width:0;grid-template-columns:minmax(0,1fr)' });
+  const vis = h('div', { style: 'min-width:0;overflow-x:auto' });
+  right.append(h('div', { class: 'small', style: 'font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)' }, 'See it · try it'), vis);
+  cols.append(left, right); box.append(cols);
+  box.append(h('div', {}, h('div', { class: 'small', style: 'font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px' }, 'Learn more'),
+    h('ul', { class: 'small', style: 'margin:0;padding-left:18px;display:grid;gap:3px' }, ...L.links.map(([t, u, d]) => h('li', {}, h('a', { href: u, target: '_blank', rel: 'noopener' }, t), d ? ' · ' + d : '')))));
+  try { L.build(vis); } catch (e) { vis.append(h('p', { class: 'muted' }, 'This example could not be drawn with the current deck settings.')); console.error(e); }
+  return box;
+}
+
+const LESSONS = [
+ { id: 'sets', title: 'A card is a set', topic: 'set theory · Venn diagrams',
+   plain: 'A <b>set</b> is a collection of things where only membership matters. Think of each card as a set of colours. Two cards <b>match</b> exactly when their sets <b>intersect</b>, meaning they have at least one element in common. In your game every card is a set with <b>one</b> element (the shirt’s biggest colour), so intersecting just means “same colour”. In the every-colour variant a card can hold two or three colours, and the sets get more interesting.',
+   game: 'Arsenal’s home shirt is mostly red, so its card is {red}. Chelsea’s is {blue}. The intersection is empty, so no match. Arsenal and Manchester United are both {red}: a match. In the every-colour variant Arsenal becomes {red, white}, and it would also match Juventus’s {white, black}.',
+   formula: 'match(x, y)  ⇔  x ∩ y ≠ ∅',
+   formulaNote: 'The symbol ∩ is “intersection” and ∅ is the empty set.',
+   links: [['Set (mathematics)', W_('Set_(mathematics)'), 'Wikipedia'], ['Venn diagram', W_('Venn_diagram'), 'Wikipedia'], ['Probability library', 'https://www.khanacademy.org/math/statistics-probability/probability-library', 'Khan Academy, starts with sets and events']],
+   build(v) {
+     const tt = topTypes(12); const a = typeSelect('lv1a', 12, tt[3] ? tt[3][0] : tt[0][0]), b = typeSelect('lv1b', 12, tt[1] ? tt[1][0] : tt[0][0]); const out = h('div');
+     const draw = () => { const x = +a.value, y = +b.value, nm = E.SCHEMES[pool.scheme];
+       const onlyA = nm.filter((_, i) => (x >> i & 1) && !(y >> i & 1)), both = nm.filter((_, i) => (x >> i & 1) && (y >> i & 1)), onlyB = nm.filter((_, i) => !(x >> i & 1) && (y >> i & 1));
+       const dots = (arr, cx) => arr.map((c, k) => `<circle cx="${cx}" cy="${100 + (k - (arr.length - 1) / 2) * 28}" r="11" fill="${E.SWATCH[c]}" stroke="var(--ink)" stroke-width="1"><title>${c}</title></circle>`).join('');
+       out.innerHTML = `<svg viewBox="0 0 360 200" width="100%" style="max-width:420px"><circle cx="135" cy="100" r="80" fill="var(--accent)" fill-opacity=".12" stroke="var(--accent)" stroke-width="2"/><circle cx="225" cy="100" r="80" fill="var(--flag)" fill-opacity=".14" stroke="var(--flag)" stroke-width="2"/>
+         ${dots(onlyA, 95)}${dots(both, 180)}${dots(onlyB, 265)}<text x="70" y="16" font-size="12" font-weight="700">card A</text><text x="262" y="16" font-size="12" font-weight="700">card B</text><text x="180" y="192" text-anchor="middle" font-size="11" style="fill:var(--muted)">A ∩ B</text></svg>`;
+       out.append(h('p', { html: both.length ? `<b>Match.</b> They share ${both.join(' and ')}.` : '<b>No match.</b> The middle region is empty: the sets are disjoint.' })); };
+     a.onchange = draw; b.onchange = draw; v.append(h('div', { style: 'display:flex;gap:10px;flex-wrap:wrap' }, h('label', { class: 'chk' }, 'Card A ', a), h('label', { class: 'chk' }, 'Card B ', b)), out); draw();
+   } },
+
+ { id: 'prob', title: 'How likely is a match?', topic: 'probability · complement rule',
+   plain: 'Probability is a long-run share. If 30 of every 100 cards in the deck would match your card, the chance of a match is 30%. It’s often easier to count what <b>doesn’t</b> happen and subtract from 1. That’s the <b>complement rule</b>.',
+   game: 'To find how likely your card is to be matched, count the cards that share none of its colours (the misses) and take that away from 100%.',
+   formula: 'P(hit x) = Σ  p(y)   over shirts y with y ∩ x ≠ ∅\n         = 1 − P(miss x)',
+   formulaNote: 'Each square in the grid is 1% of the deck. Pick a card to see which squares match it.',
+   links: [['Basic probability', 'https://seeing-theory.brown.edu/basic-probability/index.html', 'Seeing Theory, interactive'], ['Introduction to Probability (free book)', 'https://math.dartmouth.edu/~prob/prob/prob.pdf', 'Grinstead & Snell, chapter 1'], ['Complementary event', W_('Complementary_event'), 'Wikipedia']],
+   build(v) {
+     const all = [...pool.masks].sort((a, b) => b[1] - a[1]); const raw = all.map(([m, p]) => [m, p * 100]); const cnt = raw.map(([m, x]) => [m, Math.floor(x), x - Math.floor(x)]);
+     let left = 100 - cnt.reduce((s, c) => s + c[1], 0); [...cnt].sort((a, b) => b[2] - a[2]).forEach(c => { if (left > 0) { c[1]++; left--; } });
+     const cells = []; cnt.forEach(([m, k]) => { for (let i = 0; i < k; i++) cells.push(m); });
+     const sel = typeSelect('lv2', 12, topTypes(12)[2] ? topTypes(12)[2][0] : null); const out = h('div');
+     const draw = () => { const x = +sel.value; let hit = 0; let s = '<svg viewBox="0 0 330 330" width="100%" style="max-width:330px">';
+       cells.forEach((m, i) => { const r = Math.floor(i / 10), c = i % 10, hitm = (m & x) !== 0; if (hitm) hit++; const n = E.maskNames(m, pool.scheme); const w = 28 / n.length;
+         n.forEach((f, k) => { s += `<rect x="${c * 33 + 2 + k * w}" y="${r * 33 + 2}" width="${w}" height="28" fill="${E.SWATCH[f]}" opacity="${hitm ? 1 : 0.18}"/>`; });
+         s += `<rect x="${c * 33 + 2}" y="${r * 33 + 2}" width="28" height="28" fill="none" stroke="${hitm ? 'var(--ink)' : 'var(--line)'}" stroke-width="${hitm ? 2 : 1}"/>`; });
+       out.innerHTML = s + '</svg>'; out.append(h('p', { html: `<b>${hit} of 100</b> cards share a colour with ${typeName(x)}. So P(hit) ≈ ${hit}% and P(miss) ≈ ${100 - hit}%. The exact value is ${pct(1 - E.missTable(pool.masks, pool.F)[x], 1)}.` })); };
+     sel.onchange = draw; v.append(h('label', { class: 'chk' }, 'Your card ', sel), out); draw();
+   } },
+
+ { id: 'cond', title: 'Conditional probability and the zig-zag', topic: 'conditional probability · tree diagrams',
+   plain: '<b>Conditional probability</b> asks: given that something already happened, how likely is the next thing? The condition shrinks the world you’re looking at. Once you know a card missed red, you’re only looking at cards without red.',
+   game: 'Your 2nd card only meets an opponent card that <b>already missed</b> your 1st card. If both your cards are red, the opponent card that survived your first red can’t be red, so your second red can’t match it. That attack is wasted. Switch colours instead.',
+   formula: 'P(hit a₂ | missed a₁) = P(missed a₁ and hit a₂) / P(missed a₁)\n                       = [d(a₁) − d(a₁ ∪ a₂)] / d(a₁)\nwhere d(x) = P(a random card misses x)',
+   links: [['Conditional probability', W_('Conditional_probability'), 'Wikipedia'], ['Compound probability', 'https://seeing-theory.brown.edu/compound-probability/index.html', 'Seeing Theory'], ['Bayes’ theorem', W_('Bayes%27_theorem'), 'Wikipedia, the same idea run backwards']],
+   build(v) {
+     const tt = topTypes(12); const a1 = typeSelect('lv3a', 12, tt[0][0]), a2 = typeSelect('lv3b', 12, tt[0][0]); const out = h('div');
+     const presets = h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' });
+     const findT = (names) => { const t = tt.find(([m]) => typeName(m) === names); return t ? t[0] : null; };
+     const t0 = tt[0] ? typeName(tt[0][0]) : null, t1 = tt[1] ? typeName(tt[1][0]) : null;
+     const pr = t0 && t1 ? [['Repeat: ' + t0 + ' → ' + t0, t0, t0], ['Switch: ' + t0 + ' → ' + t1, t0, t1]] : [];
+     pr.forEach(([lab, x, y]) => { const mx = findT(x), my = findT(y); if (mx != null && my != null) presets.append(h('button', { class: 'chip', onclick: () => { a1.value = mx; a2.value = my; draw(); } }, lab)); });
+     const draw = () => { const D = E.missTable(pool.masks, pool.F), x = +a1.value, y = +a2.value; const pHit1 = 1 - D[x], pMiss1 = D[x], pHit2 = pMiss1 > 0 ? (D[x] - D[x | y]) / D[x] : 0;
+       out.innerHTML = `<svg viewBox="0 0 440 220" width="100%" style="max-width:480px"><defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+         <rect x="6" y="90" width="90" height="40" rx="6" fill="var(--card)" stroke="var(--ink)"/><text x="51" y="108" text-anchor="middle" font-size="11">their card vs</text><text x="51" y="122" text-anchor="middle" font-size="11" font-weight="700">your a₁</text>
+         <path d="M96 105 L170 45" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar3)"/><path d="M96 115 L170 165" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar3)"/>
+         <text x="118" y="64" font-size="12" font-weight="700" style="fill:var(--bad)">${pct(pHit1, 0)}</text><text x="118" y="160" font-size="12" font-weight="700" style="fill:var(--good)">${pct(pMiss1, 0)}</text>
+         <rect x="172" y="25" width="110" height="40" rx="6" fill="var(--bad)" fill-opacity=".15" stroke="var(--bad)"/><text x="227" y="49" text-anchor="middle" font-size="11">they win the pile</text>
+         <rect x="172" y="145" width="110" height="40" rx="6" fill="var(--card)" stroke="var(--ink)"/><text x="227" y="163" text-anchor="middle" font-size="11">missed a₁, now your</text><text x="227" y="177" text-anchor="middle" font-size="11" font-weight="700">a₂ attacks it</text>
+         <path d="M282 160 L350 120" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar3)"/><path d="M282 170 L350 205" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar3)"/>
+         <text x="300" y="130" font-size="12" font-weight="700" style="fill:var(--good)">${pct(pHit2, 0)}</text><text x="300" y="206" font-size="12" font-weight="700" style="fill:var(--muted)">${pct(1 - pHit2, 0)}</text>
+         <rect x="352" y="102" width="84" height="34" rx="6" fill="var(--good)" fill-opacity=".15" stroke="var(--good)"/><text x="394" y="123" text-anchor="middle" font-size="11">you win</text>
+         <rect x="352" y="190" width="84" height="26" rx="6" fill="none" stroke="var(--line)"/><text x="394" y="207" text-anchor="middle" font-size="11">set goes on</text></svg>`;
+       out.append(h('p', { html: `Your second card wins with probability <b>${pct(pHit2, 0)}</b>, given the first one survived. On its own it would hit ${pct(1 - D[y], 0)} of cards. ${pHit2 < 0.05 ? '<b>Wasted attack:</b> anything that missed a₁ also misses a₂.' : 'The two cards cover different colours, so the attack is fresh.'}` })); };
+     a1.onchange = draw; a2.onchange = draw; v.append(presets, h('div', { style: 'display:flex;gap:10px;flex-wrap:wrap' }, h('label', { class: 'chk' }, 'a₁ ', a1), h('label', { class: 'chk' }, 'a₂ ', a2)), out); draw();
+   } },
+
+ { id: 'ev', title: 'Expected value: more than winning', topic: 'random variables · expectation',
+   plain: 'The <b>expected value</b> is the long-run average of something random: multiply each outcome by its probability and add up. A set can end in many ways, and each way moves a different number of cards. Expected value turns all of that into one number: how many cards this order gains you on average.',
+   game: 'Winning early takes a small pile. Losing late gives away a big one. Two orders with the same chance of winning can have very different expected card swings. That’s why the optimiser maximises the swing, not just the win chance.',
+   formula: 'E[swing] = Σ  P(set ends at card L) × (cards you gain or lose at L)',
+   links: [['Expected value', W_('Expected_value'), 'Wikipedia'], ['Random variables', 'https://www.khanacademy.org/math/statistics-probability/random-variables-stats-library', 'Khan Academy'], ['Introduction to Probability', 'https://math.dartmouth.edu/~prob/prob/prob.pdf', 'Grinstead & Snell, chapter 6']],
+   build(v) {
+     let seed = 5; const out = h('div'); const btn = h('button', { class: 'btn ghost' }, 'Deal another hand');
+     const events = (a, d, starter) => { const ev = []; let alive = 1, my = 0, op = 0, prev = 0; const opp = () => { op++; if (my > 0) { const p = 1 - d[a[my - 1]]; ev.push(['they match card ' + (my + op), alive * p, -my]); alive *= 1 - p; prev = a[my - 1]; } else prev = 0; };
+       const me = () => { const x = a[my]; my++; if (op > 0) { const dp = prev ? d[prev] : 1; const p = dp > 0 ? (dp - d[prev | x]) / dp : 0; ev.push(['you match card ' + (my + op), alive * p, op]); alive *= 1 - p; } };
+       for (let i = 0; i < 12 && my < a.length; i++) { if (starter) { me(); opp(); } else { opp(); me(); } } return ev; };
+     const draw = () => { const D = E.missTable(pool.masks, pool.F), R = E.rng(seed), draw2 = E.sampler(pool); const hand = Array.from({ length: 8 }, (_, i) => ({ id: i, mask: draw2(R).mask }));
+       const ctx = { hand, starter: true, oppLen: 20, popD: D, countD: D, F: pool.F, R: E.rng(1) };
+       const orders = [['Random order', E.STRATEGIES.random.fn(ctx)], ['Shield + zig-zag', E.STRATEGIES.zigzag.fn(ctx)]];
+       out.innerHTML = ''; const tbl = h('table', { class: 'tbl' }); tbl.append(h('tr', {}, h('th', {}, 'Order'), h('th', {}, 'P(win set)'), h('th', {}, 'Expected swing')));
+       const charts = [];
+       for (const [lab, o] of orders) { const a = o.map(c => c.mask), ev = events(a, D, true), r = E.setOutcome(a, D, true, 20);
+         tbl.append(h('tr', {}, h('td', { html: lab + '<br>' + o.map(c => shirtFromMask(c.mask, pool.scheme).replace('<svg', '<svg width="20" height="20"')).join('') }), h('td', { class: 'mono' }, pct(r.win, 0)), h('td', { class: 'mono' }, (r.swing >= 0 ? '+' : '') + r.swing.toFixed(2) + ' cards')));
+         charts.push(h('p', { class: 'small', style: 'margin:8px 0 0' }, lab + ': contribution of each ending (probability × cards)'), barChart(ev.slice(0, 10).map(([l, p, g]) => [l.replace(/they match card |you match card /, (l.startsWith('you') ? '+' : '−')), Math.abs(p * g)]), { h: 110, fmt: x => x.toFixed(2) })); }
+       out.append(tbl, ...charts, h('p', { class: 'small muted' }, 'Bars marked + are your wins and − your losses, by the card the set ends on. You start the set.')); };
+     btn.onclick = () => { seed++; draw(); }; v.append(btn, out); draw();
+   } },
+
+ { id: 'dist', title: 'Coin flips, waiting times and rare events', topic: 'Bernoulli · binomial · geometric · Poisson',
+   plain: 'A <b>Bernoulli trial</b> is one yes/no experiment, like a single comparison. Counting successes in many trials gives the <b>binomial</b> distribution. Waiting for the first success gives the <b>geometric</b> distribution. When successes are rare, the binomial becomes the <b>Poisson</b> distribution. These four cover most of the randomness in the game.',
+   game: 'Each comparison is roughly a coin that lands “match” with probability q. The number of cards until the set ends is a waiting time, roughly geometric. The number of green cards in your hand is binomial, and because green is rare, almost exactly Poisson.',
+   formula: 'Geometric:  P(first match at trial k) = (1 − q)^(k−1) · q\nBinomial:   P(k of n)  = C(n,k) pᵏ (1−p)^(n−k)\nPoisson:    P(k)       = e^(−λ) λᵏ / k!     (λ = n·p)',
+   formulaNote: 'The Distributions tab compares each of these with the real game.',
+   links: [['Probability distributions', 'https://seeing-theory.brown.edu/probability-distributions/index.html', 'Seeing Theory, interactive'], ['Poisson distribution', W_('Poisson_distribution'), 'Wikipedia'], ['Geometric distribution', W_('Geometric_distribution'), 'Wikipedia']],
+   build(v) {
+     const sl = h('input', { type: 'range', min: '0.05', max: '0.9', step: '0.01', value: E.matchProbability(pool).toFixed(2), id: 'lv5', 'aria-label': 'match chance' }); const lab = h('span', { class: 'mono' }); const out = h('div');
+     const draw = () => { const q = +sl.value; lab.textContent = pct(q, 0); const pts = []; for (let k = 1; k <= 10; k++) pts.push([String(k), (1 - q) ** (k - 1) * q]);
+       out.innerHTML = ''; out.append(barChart(pts, { h: 140, fmt: x => pct(x, 0) }), h('p', { class: 'small', html: `If every comparison matched with probability ${pct(q, 0)}, the set would end at the 1st comparison ${pct(q, 0)} of the time and at the 2nd ${pct((1 - q) * q, 0)}. On average you’d wait <b>${(1 / q).toFixed(1)} comparisons</b> (1/q). Your deck’s real value is ${pct(E.matchProbability(pool), 0)}.` })); };
+     sl.oninput = draw; v.append(h('label', { class: 'row' }, 'Match chance per comparison', lab), sl, out); draw();
+   } },
+
+ { id: 'markov', title: 'Markov chains: why going second wins', topic: 'Markov chains · transition matrices',
+   plain: 'A <b>Markov chain</b> is a system that jumps between <b>states</b>, where the next jump depends only on the current state, not the history. You describe it with a table of jump probabilities, the <b>transition matrix</b>. Multiplying by the matrix moves you one step forward in time.',
+   game: 'During a set, the only thing that matters is the <b>last card laid</b>. That card is the state. The next card either matches it (the set ends) or becomes the new state. Because the starter’s first card can never win, the second player gets the first real shot, and ends up winning most sets.',
+   formula: 'M[i → j] = p(j)  if j ∩ i = ∅   (no match, continue)\nP(set still going after k cards) = 1ᵀ · Mᵏ⁻¹ · p\nP(second player wins) = Σ P(set ends at an even card)',
+   formulaNote: 'Below is a toy world with just three kinds of shirt, so you can see the whole matrix. Move the sliders.',
+   links: [['Markov chains, explained visually', 'https://setosa.io/ev/markov-chains/', 'Setosa, interactive'], ['Markov chain', W_('Markov_chain'), 'Wikipedia'], ['Introduction to Probability', 'https://math.dartmouth.edu/~prob/prob/prob.pdf', 'Grinstead & Snell, chapter 11'], ['MIT 6.041 Probabilistic Systems', 'https://ocw.mit.edu/courses/6-041sc-probabilistic-systems-analysis-and-applied-probability-fall-2013/', 'free course, Markov chain lectures']],
+   build(v) {
+     const nm = E.SCHEMES[pool.scheme], bit = c => 1 << nm.indexOf(c);
+     const dom = (cfg.colour.rule || 'dominant') === 'dominant'; const types = dom ? [['white', bit('white')], ['red', bit('red')], ['blue', bit('blue')], ['black', bit('black')]] : [['white', bit('white')], ['red', bit('red')], ['blue', bit('blue')], ['white + red', bit('white') | bit('red')]];
+     const w = [0.35, 0.25, 0.25, 0.15]; const out = h('div'); const ctr = h('div', { style: 'display:grid;gap:4px' });
+     const sls = types.map(([n], i) => { const s = h('input', { type: 'range', min: '0', max: '1', step: '0.01', value: String(w[i]), id: 'lv6' + i, 'aria-label': n }); s.oninput = () => { w[i] = +s.value; draw(); }; return h('label', { class: 'row small' }, n, s); });
+     ctr.append(...sls);
+     const draw = () => { const tot = w.reduce((a, b) => a + b, 0) || 1; const p = w.map(x => x / tot); const masks = new Map(); types.forEach(([, m], i) => masks.set(m, (masks.get(m) || 0) + p[i]));
+       const toy = { masks, F: pool.F, scheme: pool.scheme }; const pe = E.setLengthLaw(toy, 40); const second = pe.reduce((s, x, L) => s + (L % 2 === 0 ? x : 0), 0);
+       const cx = [70, 290, 70, 290], cy = [50, 50, 190, 190]; let s = `<svg viewBox="0 0 360 262" width="100%" style="max-width:420px"><defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>`;
+       types.forEach(([, mi], i) => types.forEach(([, mj], j) => { if (i !== j && !(mi & mj) && p[j] > 0) { const x1 = cx[i], y1 = cy[i], x2 = cx[j], y2 = cy[j]; const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy); const ox = -dy / L * 8, oy = dx / L * 8;
+         s += `<line x1="${x1 + dx / L * 30 + ox}" y1="${y1 + dy / L * 30 + oy}" x2="${x2 - dx / L * 32 + ox}" y2="${y2 - dy / L * 32 + oy}" stroke="var(--muted)" stroke-width="${1 + 6 * p[j]}" marker-end="url(#ar4)"/><text x="${(x1 + x2) / 2 + ox * 2.2}" y="${(y1 + y2) / 2 + oy * 2.2 + 4}" text-anchor="middle" font-size="10" style="fill:var(--muted)">${pct(p[j], 0)}</text>`; } }));
+       types.forEach(([n, m], i) => { const fams = E.maskNames(m, pool.scheme); s += `<circle cx="${cx[i]}" cy="${cy[i]}" r="28" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/>` + fams.map((f, k) => `<circle cx="${cx[i] + (k - (fams.length - 1) / 2) * 16}" cy="${cy[i] - 4}" r="7" fill="${E.SWATCH[f]}" stroke="var(--ink)" stroke-width=".8"/>`).join('') + `<text x="${cx[i]}" y="${cy[i] + 16}" text-anchor="middle" font-size="10">${n}</text>`; });
+       s += `<text x="180" y="254" text-anchor="middle" font-size="11" style="fill:var(--muted)">arrows = no match, the set continues (thickness = chance)</text></svg>`;
+       const mt = h('table', { class: 'heat' }); mt.append(h('tr', {}, h('th', {}, 'from \\ to'), ...types.map(([n]) => h('th', {}, n)), h('th', {}, 'match → end')));
+       types.forEach(([n, mi], i) => { let end = 0; const tr = h('tr', {}, h('th', { style: 'text-align:right' }, n)); types.forEach(([, mj], j) => { const val = (mi & mj) ? 0 : p[j]; if (mi & mj) end += p[j]; tr.append(h('td', { style: `background:color-mix(in srgb, var(--accent) ${(val * 90).toFixed(0)}%, transparent)` }, val.toFixed(2))); }); tr.append(h('td', { style: `background:color-mix(in srgb, var(--bad) ${(end * 80).toFixed(0)}%, transparent)` }, end.toFixed(2))); mt.append(tr); });
+       out.innerHTML = s; out.append(h('div', { class: 'scroll' }, mt), h('p', { html: `In this toy world the <b>second player wins ${pct(second, 0)}</b> of sets. Each row adds up to 1. ${dom ? 'Make one colour dominate and sets get shorter (more same-colour pairs); make the colours equal and they get longer.' : 'Make white+red common and the sets get shorter; make the plain colours equal and they get longer.'}` })); };
+     v.append(ctr, out); draw();
+   } },
+
+ { id: 'walk', title: 'Random walks and gambler’s ruin', topic: 'random walks · martingales',
+   plain: 'A <b>random walk</b> is a path built from random steps up and down. In <b>gambler’s ruin</b>, a gambler bets until they’re broke or own everything. If the game is fair, the chance of ending rich equals the share of the money you start with. A fair game like this is called a <b>martingale</b>.',
+   game: 'Your card count after each set is a random walk between 0 and the whole deck. With random play, your chance of winning the game is almost exactly your share of the cards. Skill bends the walk: a good strategy adds a small upward drift, and over many sets that drift beats the noise.',
+   formula: 'Fair walk from k to 0 or N:   P(reach N) = k / N\nExpected duration ≈ k (N − k) / σ²      (σ² = average squared step)',
+   links: [['Gambler’s ruin', W_('Gambler%27s_ruin'), 'Wikipedia'], ['Random walk', W_('Random_walk'), 'Wikipedia'], ['Martingale', W_('Martingale_(probability_theory)'), 'Wikipedia'], ['Introduction to Probability', 'https://math.dartmouth.edu/~prob/prob/prob.pdf', 'Grinstead & Snell, chapter 12 (random walks)']],
+   build(v) {
+     let seed = 11; const sel = h('select', { id: 'lv7' }, h('option', { value: 'random' }, 'Both random (fair)'), h('option', { value: 'zigzag' }, 'A plays shield + zig-zag')); const btn = h('button', { class: 'btn ghost' }, 'Play 8 more games'); const out = h('div');
+     const draw = () => { const R = E.rng(seed), N = 40, mk = E.makeDeckFactory(pool, N), o = { R, F: pool.F, popD: E.missTable(pool.masks, pool.F), popDist: pool.masks, maxSets: 1500 }; const cols = [css('--accent'), css('--flag'), css('--muted'), css('--bad'), css('--ink')];
+       const series = []; let wins = 0; for (let g = 0; g < 8; g++) { const tr = []; const r = E.playGame(mk(R), sel.value, 'random', { ...o, trace: tr }); if (r.winner === 0) wins++; series.push({ pts: [[0, N / 2], ...tr.map((s, i) => [i + 1, s.after ? s.after[0] : (s.ranOut === 0 ? 0 : N)])], color: cols[g % 5], w: 1.6 }); }
+       const xmax = Math.max(...series.map(s => s.pts[s.pts.length - 1][0])); out.innerHTML = ''; out.append(lineChart(series, { h: 200, ymin: 0, ymax: N, xlabel: 'set', ylabel: 'A’s cards' }), h('p', { class: 'small', html: `8 games of 40 cards, each line one game. Player A won <b>${wins} of 8</b>. ${sel.value === 'random' ? 'Lines wander with no direction, and some take hundreds of sets.' : 'Most lines drift up: a small edge per set adds up.'}` })); };
+     btn.onclick = () => { seed++; draw(); }; sel.onchange = draw; v.append(h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;align-items:center' }, sel, btn), out); draw();
+   } },
+
+ { id: 'graph', title: 'Graphs: who can beat whom', topic: 'graph theory · paths · cliques',
+   plain: 'A <b>graph</b> is a set of dots (vertices) joined by lines (edges). Graphs turn “who is connected to whom” into a picture. A <b>path</b> is a route along edges. A <b>clique</b> is a group where everyone is connected to everyone.',
+   game: 'Draw each card as a dot and join two dots if the shirts share a colour. You get the <b>match graph</b>, and every edge is a possible pile-winner. Your order is a path through your own cards. The zig-zag rule says to step to a card <b>not</b> joined to the previous one, so each step attacks a new part of the graph.',
+   formula: 'G = (V, E),   V = cards,   {x, y} ∈ E  ⇔  x ∩ y ≠ ∅\nThis is called an intersection graph.',
+   links: [['Network Science (free book)', 'https://networksciencebook.com/', 'Barabási, chapters 1–2'], ['Intersection graph', W_('Intersection_graph'), 'Wikipedia'], ['Graph theory', W_('Graph_theory'), 'Wikipedia']],
+   build(v) {
+     let seed = 3; const btn = h('button', { class: 'btn ghost' }, 'New hand'); const out = h('div');
+     const draw = () => { const R = E.rng(seed), dr = E.sampler(pool); const hand = Array.from({ length: 8 }, (_, i) => { const e = dr(R); return { id: i, mask: e.mask, team: e.team, kit: e.kit }; }); const D = E.missTable(pool.masks, pool.F);
+       const order = E.STRATEGIES.zigzag.fn({ hand, starter: true, oppLen: 20, popD: D, countD: D, F: pool.F, R: E.rng(2) }); const pos = {}; const W = 380, H = 300, cx = W / 2, cy = H / 2 + 6, rad = 112;
+       hand.forEach((c, k) => { const a = -Math.PI / 2 + 2 * Math.PI * k / hand.length; pos[c.id] = [cx + rad * Math.cos(a), cy + rad * Math.sin(a)]; });
+       let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:440px">`; let edges = 0;
+       for (let i = 0; i < hand.length; i++) for (let j = i + 1; j < hand.length; j++) if (hand[i].mask & hand[j].mask) { edges++; s += `<line x1="${pos[hand[i].id][0]}" y1="${pos[hand[i].id][1]}" x2="${pos[hand[j].id][0]}" y2="${pos[hand[j].id][1]}" stroke="var(--line)" stroke-width="2"/>`; }
+       for (let k = 1; k < order.length; k++) { const [x1, y1] = pos[order[k - 1].id], [x2, y2] = pos[order[k].id]; const rep = (order[k - 1].mask & order[k].mask) !== 0; s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${rep ? 'var(--bad)' : 'var(--good)'}" stroke-width="3" ${rep ? 'stroke-dasharray="5 4"' : ''} opacity=".85"/>`; }
+       hand.forEach(c => { const [x, y] = pos[c.id]; const k = order.indexOf(c); s += `<circle cx="${x}" cy="${y}" r="24" fill="var(--card)" stroke="var(--ink)"/>` + shirtFromMask(c.mask, pool.scheme).replace('<svg ', `<svg x="${x - 17}" y="${y - 19}" width="34" height="34" `) + `<circle cx="${x + 20}" cy="${y - 18}" r="9" fill="var(--flag)"/><text x="${x + 20}" y="${y - 14}" text-anchor="middle" font-size="10" font-weight="700" style="fill:#15212b">${k + 1}</text>`; });
+       out.innerHTML = s + '</svg>'; out.append(h('p', { class: 'small', html: `Grey lines: the two shirts share a colour (${edges} edges). Coloured path: the shield + zig-zag order, numbered 1–8. <span style="color:var(--good)">Green</span> steps jump between unconnected cards (fresh attack), <span style="color:var(--bad)">red dashed</span> ones repeat a colour.` })); };
+     btn.onclick = () => { seed++; draw(); }; v.append(btn, out); draw();
+   } },
+
+ { id: 'matrix', title: 'Matrices and the most central shirt', topic: 'linear algebra · eigenvectors',
+   plain: 'A <b>matrix</b> is a table of numbers that acts on lists of numbers (vectors). An <b>eigenvector</b> is a direction the matrix only stretches, without turning it. Google’s original PageRank used exactly this to find the most “central” web pages. Multiply any vector by the matrix again and again, and it settles on the main eigenvector. That’s <b>power iteration</b>.',
+   game: 'Write K[i][j] = 1 if card types i and j match. The chance that two random cards match is then a single matrix product, pᵀKp. With one colour per card, K is the identity and pᵀKp = Σp². In the every-colour variant K has off-diagonal 1s, and its main eigenvector scores each shirt by how central it is.',
+   formula: 'P(match) = pᵀ K p = Σᵢ Σⱼ pᵢ Kᵢⱼ pⱼ\nPower iteration:  v ← K v / ‖K v‖   (repeat)\nconverges to the Perron eigenvector, K v = λ v',
+   links: [['Essence of linear algebra', 'https://www.3blue1brown.com/topics/linear-algebra', '3Blue1Brown videos'], ['MIT 18.06 Linear Algebra', 'https://ocw.mit.edu/courses/18-06sc-linear-algebra-fall-2011/', 'Gilbert Strang, free course'], ['Power iteration', W_('Power_iteration'), 'Wikipedia'], ['Perron–Frobenius theorem', W_('Perron%E2%80%93Frobenius_theorem'), 'Wikipedia']],
+   build(v) {
+     const tt = topTypes(6); const K = tt.map(([a]) => tt.map(([b]) => (a & b) ? 1 : 0)); let vec = tt.map(() => 1 / Math.sqrt(tt.length)); let step = 0; const out = h('div'); const btn = h('button', { class: 'btn ghost' }, 'Multiply by K once more'); const reset = h('button', { class: 'btn ghost' }, 'Start over');
+     const draw = () => { const mt = h('table', { class: 'heat' }); mt.append(h('tr', {}, h('th', {}, 'K'), ...tt.map(([m]) => h('th', { html: shirtFromMask(m, pool.scheme).replace('<svg', '<svg width="22" height="22"') })), h('th', {}, 'v (step ' + step + ')')));
+       tt.forEach(([m], i) => { const tr = h('tr', {}, h('th', { style: 'text-align:right;font-size:11px' }, typeName(m))); K[i].forEach(x => tr.append(h('td', { style: `background:${x ? 'color-mix(in srgb, var(--accent) 60%, transparent)' : 'transparent'}` }, String(x)))); tr.append(h('td', {}, h('div', { class: 'pbar' }, h('span', { class: 'mono small', style: 'width:36px' }, vec[i].toFixed(2)), h('div', { class: 'track' }, h('div', { class: 'fill', style: `width:${(100 * vec[i] / Math.max(...vec)).toFixed(0)}%` }))))); mt.append(tr); });
+       const p = tt.map(t => t[1]), ps = p.reduce((a, b) => a + b, 0), q = p.map(x => x / ps); let quad = 0; q.forEach((a, i) => q.forEach((b, j) => quad += a * K[i][j] * b));
+       out.innerHTML = ''; out.append(h('div', { class: 'scroll' }, mt), h('p', { class: 'small', html: `Step ${step}: the bars are the current vector v. Keep multiplying and they stop changing; that’s the eigenvector. With just these 6 shirt types (re-weighted to sum to 1), pᵀKp = <b>${pct(quad, 0)}</b> is the chance two such cards match.` })); };
+     btn.onclick = () => { const w = K.map(r => r.reduce((s, x, j) => s + x * vec[j], 0)); const n = Math.hypot(...w) || 1; vec = w.map(x => x / n); step++; draw(); }; reset.onclick = () => { vec = tt.map(() => 1 / Math.sqrt(tt.length)); step = 0; draw(); };
+     v.append(h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, btn, reset), out); draw();
+   } },
+
+ { id: 'perm', title: 'Permutations: how many ways to order a hand', topic: 'combinatorics · symmetric group',
+   plain: 'A <b>permutation</b> is an ordering. n cards can be ordered in n! = n × (n−1) × … × 1 ways, which grows explosively: 20 cards have about 2.4 quintillion orders. All the orderings together, with “do one, then the other” as the operation, form the <b>symmetric group</b> Sₙ. Every ordering can be reached by swapping two cards at a time (<b>transpositions</b>).',
+   game: 'You can’t try every order of 20 cards, but you can for 4 cards: there are only 24. Below, every one of the 24 orders of a 4-card hand is scored by its exact chance of winning the set. The optimiser does the same search on big hands, by swapping two cards whenever that helps.',
+   formula: 'n! orders:  4! = 24,  10! = 3,628,800,  20! ≈ 2.4 × 10¹⁸\nAny order = a product of transpositions (swaps)',
+   links: [['Permutation', W_('Permutation'), 'Wikipedia'], ['Symmetric group', W_('Symmetric_group'), 'Wikipedia'], ['Group Explorer', 'https://nathancarter.github.io/group-explorer/', 'visual tool for groups like S₃, S₄']],
+   build(v) {
+     let seed = 9; const btn = h('button', { class: 'btn ghost' }, 'New 4-card hand'); const out = h('div');
+     const perms = a => a.length <= 1 ? [a] : a.flatMap((x, i) => perms([...a.slice(0, i), ...a.slice(i + 1)]).map(p => [x, ...p]));
+     const draw = () => { const R = E.rng(seed), dr = E.sampler(pool), D = E.missTable(pool.masks, pool.F); const hand = Array.from({ length: 4 }, () => dr(R).mask);
+       const all = perms([0, 1, 2, 3]).map(p => { const a = p.map(i => hand[i]); return [p, E.setOutcome(a, D, true, 20).win]; }).sort((a, b) => b[1] - a[1]);
+       const W = 520, H = 170, bw = W / 24; let s = `<svg viewBox="0 0 ${W} ${H + 66}" width="100%" style="min-width:420px">`; const mx = all[0][1];
+       all.forEach(([p, w], i) => { const bh = (H - 20) * w / mx; s += `<rect x="${i * bw + 2}" y="${H - bh}" width="${bw - 4}" height="${bh}" fill="${i === 0 ? 'var(--accent)' : i === all.length - 1 ? 'var(--bad)' : 'var(--muted)'}" rx="2"><title>${pct(w, 1)}</title></rect>`;
+         p.forEach((ci, k) => { const fams = E.maskNames(hand[ci], pool.scheme); fams.forEach((f, z) => { s += `<rect x="${i * bw + 3 + z * (bw - 6) / fams.length}" y="${H + 6 + k * 14}" width="${(bw - 6) / fams.length}" height="11" fill="${E.SWATCH[f]}"/>`; }); s += `<rect x="${i * bw + 3}" y="${H + 6 + k * 14}" width="${bw - 6}" height="11" fill="none" stroke="var(--line)"/>`; }); });
+       out.innerHTML = s + '</svg>'; out.append(h('p', { class: 'small', html: `Each bar is one of the 24 orders, with its cards stacked underneath (1st card on top). Best order: <b>${pct(all[0][1], 0)}</b> to win the set. Worst: <b>${pct(all[all.length - 1][1], 0)}</b>. Same cards, different order.` })); };
+     btn.onclick = () => { seed++; draw(); }; v.append(btn, out); draw();
+   } },
+
+ { id: 'lattice', title: 'Counting overlaps: inclusion–exclusion', topic: 'Boolean lattice · Möbius inversion',
+   plain: 'To count things that have <i>A or B</i>, add those with A to those with B, then subtract those with both, because you counted them twice. That’s <b>inclusion–exclusion</b>. All the subsets of a set, arranged from small to big, form the <b>Boolean lattice</b>; a <b>Hasse diagram</b> draws it. Möbius inversion is the general version of “add, then correct the double-counting”.',
+   game: 'Suppose you’re holding a red card and a white card, and want the chance that a random card matches at least one of them. That’s P(white or red) = P(white) + P(red) − P(white and red). With one colour per card, “white and red” is impossible, so the overlap is 0. In the every-colour variant it isn’t, and you must subtract it. The engine does this for every set of colours at once with a quick “subset-sum” pass.',
+   formula: 'P(W ∪ R) = P(W) + P(R) − P(W ∩ R)\nd(x) = P(card ⊆ complement of x) = Σ over y ⊆ ¬x of p(y)\n(zeta transform; its inverse is Möbius inversion)',
+   links: [['Inclusion–exclusion principle', W_('Inclusion%E2%80%93exclusion_principle'), 'Wikipedia'], ['Hasse diagram', W_('Hasse_diagram'), 'Wikipedia'], ['Möbius inversion formula', W_('M%C3%B6bius_inversion_formula'), 'Wikipedia']],
+   build(v) {
+     const nm = E.SCHEMES[pool.scheme]; const cs = ['white', 'red', 'blue'].filter(c => nm.includes(c)); const bit = c => 1 << nm.indexOf(c); const masks = [...pool.masks];
+     const has = m => masks.reduce((s, [x, p]) => s + ((x & m) === m ? p : 0), 0); const any = m => masks.reduce((s, [x, p]) => s + ((x & m) ? p : 0), 0);
+     const W = has(bit('white')), Rr = has(bit('red')), WR = has(bit('white') | bit('red'));
+     const subsets = []; for (let k = 0; k < 8; k++) subsets.push(cs.filter((_, i) => k >> i & 1));
+     const level = s => s.length; const byL = [[], [], [], []]; subsets.forEach(s => byL[level(s)].push(s)); const pos = new Map(); const Wd = 420;
+     byL.forEach((arr, l) => arr.forEach((s, i) => pos.set(s.join(','), [Wd / 2 + (i - (arr.length - 1) / 2) * 136, 222 - l * 64])));
+     let s = `<svg viewBox="0 0 ${Wd} 250" width="100%" style="max-width:460px">`;
+     subsets.forEach(a => subsets.forEach(b => { if (b.length === a.length + 1 && a.every(x => b.includes(x))) { const [x1, y1] = pos.get(a.join(',')), [x2, y2] = pos.get(b.join(',')); s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--line)" stroke-width="2"/>`; } }));
+     subsets.forEach(a => { const [x, y] = pos.get(a.join(',')); const m = a.reduce((t, c) => t | bit(c), 0); const val = a.length ? any(m) : 0; s += `<rect x="${x - 56}" y="${y - 22}" width="112" height="44" rx="6" fill="var(--card)" stroke="var(--ink)"/>` + a.map((c, k) => `<circle cx="${x + (k - (a.length - 1) / 2) * 12}" cy="${y - 12}" r="5" fill="${E.SWATCH[c]}" stroke="var(--ink)" stroke-width=".6"/>`).join('') + `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="10">${a.length ? a.join('+') : '∅ (no colours)'}</text><text x="${x}" y="${y + 16}" text-anchor="middle" font-size="10" style="fill:var(--accent)">${a.length ? 'hits: ' + pct(val, 0) : 'hits nothing'}</text>`; });
+     v.innerHTML = s + '</svg>';
+     v.append(h('p', { class: 'small' }, 'Each box is a set of colours, with lines going up to bigger sets. “hits” = the share of cards that share at least one of those colours.'),
+       h('div', { class: 'formula' }, `P(white or red) = P(white) + P(red) − P(both)\n               = ${pct(W, 1)} + ${pct(Rr, 1)} − ${pct(WR, 1)} = ${pct(W + Rr - WR, 1)}`));
+   } },
+
+ { id: 'game', title: 'Game theory: is there a best strategy?', topic: 'payoff matrices · Nash equilibrium',
+   plain: 'Game theory studies decisions when your result depends on what others choose. A <b>payoff matrix</b> lists how each strategy does against each other strategy. A <b>Nash equilibrium</b> is a choice (possibly a random mix) that no player can improve by switching alone. In rock–paper–scissors it’s playing each move ⅓ of the time.',
+   game: 'The tournament is a payoff matrix: the share of games strategy A wins against B. <b>Fictitious play</b> repeatedly plays the best answer to everything played so far, and the mix it settles on approximates the equilibrium. If one strategy beats everything, the equilibrium is simply “always play it”.',
+   formula: 'Payoff  A(i, j) = P(strategy i beats j) − ½        (zero-sum)\nEquilibrium mix x*:  maxₓ minⱼ  Σᵢ xᵢ A(i, j)',
+   links: [['Game Theory (Yale, Ben Polak)', 'https://oyc.yale.edu/economics/econ-159', 'free lecture course'], ['Nash equilibrium', W_('Nash_equilibrium'), 'Wikipedia'], ['Fictitious play', W_('Fictitious_play'), 'Wikipedia']],
+   build(v) {
+     const T = pre.tournament, n = T.names.length, A = T.winRate.map(r => r.map(x => x - 0.5)); const cnt = new Array(n).fill(0); let payoff = new Array(n).fill(0); const hist = [];
+     for (let it = 0; it < 4000; it++) { let best = 0; for (let i = 1; i < n; i++) if (payoff[i] > payoff[best]) best = i; cnt[best]++; for (let i = 0; i < n; i++) payoff[i] += A[i][best]; if (it % 400 === 399) hist.push(cnt.map(c => c / (it + 1))); }
+     const mix = cnt.map(c => c / 4000); const order = T.names.map((_, i) => i).sort((a, b) => mix[b] - mix[a]);
+     const cyc = []; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++) if (i < j && i < k && j !== k && T.winRate[i][j] > 0.55 && T.winRate[j][k] > 0.55 && T.winRate[k][i] > 0.55) cyc.push([i, j, k]);
+     const shown = order.filter(i => mix[i] > 0.005); v.append(barChart([...shown, ...order.filter(i => !shown.includes(i)).slice(0, Math.max(0, 3 - shown.length))].map(i => [E.STRATEGIES[T.names[i]].label.replace(' + optimiser', '').replace('Random shuffle', 'Random').slice(0, 13), mix[i]]), { h: 150, fmt: x => pct(x, 0) }),
+       h('p', { class: 'small', html: `Equilibrium mix found by fictitious play over the tournament results: ${order.filter(i => mix[i] > 0.01).map(i => `<b>${E.STRATEGIES[T.names[i]].label}</b> ${pct(mix[i], 0)}`).join(', ')}. ${mix[order[0]] > 0.9 ? 'One strategy beats all others, so the “mix” is just that strategy.' : 'No single strategy dominates, so the best plan is to mix.'}` }),
+       h('p', { class: 'small', html: cyc.length ? `Rock–paper–scissors loop found: ${cyc.slice(0, 1).map(([i, j, k]) => `${E.STRATEGIES[T.names[i]].label} beats ${E.STRATEGIES[T.names[j]].label}, which beats ${E.STRATEGIES[T.names[k]].label}, which beats ${E.STRATEGIES[T.names[i]].label}`)}. Being best on average isn’t the same as beating everyone.` : 'No rock–paper–scissors loops among the strategies (with a 55% threshold): the ranking is consistent.' }));
+   } },
+
+ { id: 'info', title: 'Information: what card counting really does', topic: 'entropy · information theory',
+   plain: '<b>Entropy</b> measures uncertainty in <b>bits</b>. A fair coin is 1 bit; something you already know is 0 bits. Each observation that narrows the possibilities removes bits. Wordle solvers, data compression and card counting all run on this idea.',
+   game: 'Before you’ve seen anything, the opponent’s next card is just “a random football shirt”, worth about 4 bits of uncertainty. Every card you see go into their hand narrows that down. The less uncertainty, the better you can choose shields and hitters.',
+   formula: 'H = − Σ p(x) log₂ p(x)          (bits)\nInformation gained = H(before) − H(after)',
+   links: [['Entropy (information theory)', W_('Entropy_(information_theory)'), 'Wikipedia'], ['Solving Wordle using information theory', 'https://www.youtube.com/watch?v=v68zYyaEmEA', '3Blue1Brown video'], ['Card counting', W_('Card_counting'), 'Wikipedia, the blackjack version']],
+   build(v) {
+     const sl = h('input', { type: 'range', min: '0', max: '20', step: '1', value: '10', id: 'lv13', 'aria-label': 'cards seen' }); const lab = h('span', { class: 'mono' }); const out = h('div');
+     const R = E.rng(77), dr = E.sampler(pool); const opp = Array.from({ length: 20 }, () => dr(R).mask);
+     const Hd = m => { let H = 0; for (const [, p] of m) if (p > 0) H -= p * Math.log2(p); return H; };
+     const draw = () => { const k = +sl.value; lab.textContent = k + ' of 20'; const dist = new Map(); opp.slice(0, k).forEach(m => dist.set(m, (dist.get(m) || 0) + 1 / 20)); for (const [m, p] of pool.masks) dist.set(m, (dist.get(m) || 0) + p * (20 - k) / 20);
+       const pts = []; for (let j = 0; j <= 20; j += 2) { const d2 = new Map(); opp.slice(0, j).forEach(m => d2.set(m, (d2.get(m) || 0) + 1 / 20)); for (const [m, p] of pool.masks) d2.set(m, (d2.get(m) || 0) + p * (20 - j) / 20); pts.push([j, Hd(d2)]); }
+       const exact = new Map(); opp.forEach(m => exact.set(m, (exact.get(m) || 0) + 1 / 20));
+       out.innerHTML = ''; out.append(lineChart([{ pts, color: css('--accent'), label: 'uncertainty about their next card' }, { pts: [[k, Hd(dist)], [k, Hd(dist) + 0.0001]], color: css('--flag'), w: 8 }], { h: 170, ymin: 0, ymax: Math.ceil(pts[0][1]), xlabel: 'their cards you’ve seen', ylabel: 'bits', yfmt: x => x }),
+         h('p', { class: 'small', html: `With ${k} of their 20 cards seen: <b>${Hd(dist).toFixed(2)} bits</b>, against ${pts[0][1].toFixed(2)} knowing nothing. Knowing their whole hand (but not the order) leaves ${Hd(exact).toFixed(2)} bits: you know the mix, just not which card comes next.` })); };
+     sl.oninput = draw; v.append(h('label', { class: 'row' }, 'Opponent cards seen', lab), sl, out); draw();
+   } },
+
+ { id: 'cycle', title: 'Why some games never end', topic: 'dynamical systems · pigeonhole principle',
+   plain: 'The <b>pigeonhole principle</b>: put 11 letters into 10 pigeonholes and some hole gets two. A deterministic system with finitely many states must sooner or later revisit a state, and from then on it repeats forever: it <b>cycles</b>. Mathematicians asked for decades whether the card game Beggar-my-neighbour has a game that never ends. One was found in 2024.',
+   game: 'If both players lead with common colours, each set ends at the 2nd card: the second player takes 1 card and must start the next set, which they then lose. The card count bounces up and down by 1 and never gets anywhere. The simulation stops such games after 1,000 sets and calls them draws.',
+   formula: 'States are finite (who holds which cards, in which order), and deterministic play means the same state always leads to the same next state.\nSo eventually  state(t + T) = state(t)  →  a cycle of length T.',
+   links: [['Pigeonhole principle', W_('Pigeonhole_principle'), 'Wikipedia'], ['Beggar-my-neighbour', W_('Beggar-my-neighbour'), 'Wikipedia, including the search for a never-ending game'], ['War (card game)', W_('War_(card_game)'), 'Wikipedia']],
+   build(v) {
+     let seed = 4; const btn = h('button', { class: 'btn ghost' }, 'Play again'); const out = h('div');
+     const draw = () => { const R = E.rng(seed), mk = E.makeDeckFactory(pool, 40), o = { R, F: pool.F, popD: E.missTable(pool.masks, pool.F), popDist: pool.masks, maxSets: 120 };
+       const t1 = [], t2 = []; E.playGame(mk(R), 'common', 'common', { ...o, trace: t1 }); E.playGame(mk(R), 'random', 'random', { ...o, trace: t2 });
+       const toPts = t => [[0, 20], ...t.map((s, i) => [i + 1, s.after ? s.after[0] : (s.ranOut === 0 ? 0 : 40)])];
+       out.innerHTML = ''; out.append(lineChart([{ pts: toPts(t1), color: css('--bad'), label: 'both lead with common colours' }, { pts: toPts(t2), color: css('--muted'), label: 'both random' }], { h: 190, ymin: 0, ymax: 40, xlabel: 'set', ylabel: 'A’s cards' }),
+         h('p', { class: 'small' }, 'The red line jitters around the same value: a near-cycle. The grey one wanders until somebody is ruined.')); };
+     btn.onclick = () => { seed++; draw(); }; v.append(btn, out); draw();
+   } },
+];
+function renderLearn() {
+  if (!pool) return; const toc = $('#lToc'), box = $('#lessons'); toc.innerHTML = ''; box.innerHTML = '';
+  LESSONS.forEach((L, i) => { toc.append(h('button', { class: 'chip', onclick: () => { const el = $('#lesson-' + L.id); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }, (i + 1) + '. ' + L.title)); box.append(lessonBox(L, i)); });
+}
+
+/* ---------- play vs computer ---------- */
+const VS = { st: null };
+function vsShort(team) { return team.replace(/ national (association )?football team/i, '').replace(/ F\.C\.$| FC$|^FC | S\.K\.| \(football\)/g, ''); }
+function vsDots(mask) { return E.maskNames(mask, VS.scheme).map(f => `<span title="${f}" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${E.SWATCH[f]};border:1px solid var(--muted);margin:0 1px"></span>`).join(''); }
+function vsCardEl(c, extra) {
+  const t = teamIndex.get(c.team), cols = t && t[10][c.kit];
+  const el = h('div', { class: 'cardx', style: 'width:96px;position:relative', html: cols ? shirtFromHex(cols) : shirtFromMask(c.mask, VS.scheme) },
+    h('div', { class: 't', style: 'font-size:11px' }, vsShort(c.team)), h('div', { html: vsDots(c.mask) }));
+  if (extra) el.append(extra); return el;
+}
+function vsKnowledge(p) { // distribution over the OTHER player's hand, as known by player p
+  const st = VS.st, opp = st.hands[1 - p]; const known = new Map(); let unknown = 0;
+  for (const c of opp) if (st.revealed.has(c.id)) known.set(c.mask, (known.get(c.mask) || 0) + 1); else unknown++;
+  const n = opp.length || 1, dist = new Map();
+  for (const [m, k] of known) dist.set(m, (dist.get(m) || 0) + k / n);
+  if (unknown) for (const [m, pr] of st.popDist) dist.set(m, (dist.get(m) || 0) + pr * unknown / n);
+  return { known, unknown, dist, D: E.missTable(dist, st.F) };
+}
+function vsCtx(p) { const st = VS.st, k = vsKnowledge(p); const S = p === 1 ? E.STRATEGIES[st.opp] : null; let D = k.D; if (S && S.info === 'count') { const rv = {}; st.revealed.forEach(id => rv[id] = 1); D = E.missTable(E.simpleCountDist(st.hands[0], rv, st.popDist, S.countColours, VS.scheme), st.F); } return { hand: st.hands[p], starter: st.starter === p, oppLen: st.hands[1 - p].length, popD: st.popD, countD: D, F: st.F, R: st.R, popDist: st.popDist, me: p, history: st.sets.map(x => ({ starter: x.starter, first: [0, 1].map(q => { const y = x.pile.find(z => z.p === q); return y ? y.c.mask : -1; }) })) }; }
+function vsNew() {
+  if (!pool) return; const N = +$('#vsN').value, R = E.rng((Math.random() * 1e9) | 0), draw = E.sampler(pool);
+  const cards = Array.from({ length: N }, (_, id) => { const e = draw(R); return { id, mask: e.mask, team: e.team, kit: e.kit }; });
+  E.shuffle(cards, R); const hands = [[], []];
+  VS.scheme = pool.scheme; VS.token = (VS.token || 0) + 1;
+  VS.st = { deck: cards, N, R, hands, revealed: new Set(), starter: R() < 0.5 ? 0 : 1, setNo: 1, phase: 'deal', pile: [], turn: 0, prev: -1, history: [[hands[0].length, hands[1].length]], sets: [], popDist: pool.masks, popD: E.missTable(pool.masks, pool.F), F: pool.F, opp: $('#vsOpp').value, lastSet: null, winner: -1 };
+  vsRender();
+}
+function vsDeal() {
+  const st = VS.st; if (st.phase !== 'deal' || st.dealing) return; st.dealing = true; const tok = VS.token; let i = 0;
+  const tick = () => { if (VS.token !== tok) return; for (let k = 0; k < 2 && st.deck.length; k++) { st.hands[i % 2].push(st.deck.shift()); i++; } vsRender();
+    if (st.deck.length) setTimeout(tick, 45); else { st.dealing = false; st.history = [[st.hands[0].length, st.hands[1].length]]; st.phase = 'arrange'; vsCpuArrange(); vsRender(); } };
+  tick();
+}
+function vsBack(count, opts = {}) {
+  const stack = h(opts.onclick ? 'button' : 'div', { class: 'vsback' + (opts.onclick ? ' live' : ''), 'aria-label': opts.label || (count + ' cards face down'), onclick: opts.onclick || null },
+    h('span', { class: 'n' }, String(count)), h('span', { class: 'l' }, opts.text || 'cards'));
+  return stack;
+}
+function vsCpuArrange() { const st = VS.st; st.hands[1] = E.STRATEGIES[st.opp].fn(vsCtx(1)); }
+function vsOdds(order) { const st = VS.st, k = vsKnowledge(0); return E.setOutcome(order.map(c => c.mask), k.D, st.starter === 0, st.hands[1].length); }
+function vsCoachOrder() { return E.STRATEGIES.counter.fn(vsCtx(0)); }
+function vsStartSet() { const st = VS.st; st.phase = 'playing'; st.pile = []; st.turn = st.starter; st.prev = -1; st.startCounts = [st.hands[0].length, st.hands[1].length]; st.oddsAtStart = vsOdds(st.hands[0]).win; vsRender(); }
+function vsStep() {
+  const st = VS.st; if (st.phase !== 'playing') return;
+  if (!st.hands[st.turn].length) { st.phase = 'over'; st.winner = 1 - st.turn; st.endReason = (st.turn === 0 ? 'You' : 'The computer') + ' had to play with no cards left.'; vsRender(); return; }
+  const c = st.hands[st.turn].shift(); st.revealed.add(c.id); const prevCard = st.pile.length ? st.pile[st.pile.length - 1] : null; st.pile.push({ c, p: st.turn });
+  if (prevCard && (c.mask & prevCard.c.mask)) {
+    const w = st.turn; st.hands[w].push(...st.pile.map(x => x.c));
+    st.lastSet = { winner: w, pile: st.pile.slice(), matchOn: c, matched: prevCard.c, shared: c.mask & prevCard.c.mask, starter: st.starter, oddsAtStart: st.oddsAtStart };
+    st.sets.push(st.lastSet); st.history.push([st.hands[0].length, st.hands[1].length]);
+    st.starter = w; st.phase = 'setover';
+    if (!st.hands[1 - w].length) { st.phase = 'over'; st.winner = w; st.endReason = (w === 0 ? 'The computer' : 'You') + ' ran out of cards.'; }
+  } else { st.turn = 1 - st.turn; }
+  vsRender();
+}
+function vsPlayOut() { const st = VS.st; let guard = 0; const tick = () => { if (st.phase !== 'playing' || guard++ > 200) return; vsStep(); if (st.phase === 'playing') setTimeout(tick, 380); }; tick(); }
+function vsNextSet() { const st = VS.st; st.setNo++; st.phase = 'arrange'; vsCpuArrange(); vsRender(); }
+function vsMove(i, j) { const H = VS.st.hands[0]; if (j < 0 || j >= H.length) return; const [c] = H.splice(i, 1); H.splice(j, 0, c); vsRender(); }
+
+function vsRender() {
+  const st = VS.st; if (!st) return; const coach = $('#vsCoach').checked; const me = st.hands[0], cpu = st.hands[1]; const k = vsKnowledge(0);
+  const oppLabel = E.STRATEGIES[st.opp].label;
+  /* score */
+  const sc = $('#vsScore'); sc.innerHTML = '';
+  const share = me.length / st.N;
+  sc.append(h('div', { style: 'display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline' },
+    h('div', { html: `<b style="color:var(--accent)">You ${me.length}</b> <span class="muted">cards</span>` }), h('div', { class: 'small muted' }, `Set ${st.setNo} · ${st.phase === 'over' ? 'game over' : (st.starter === 0 ? 'you start' : 'computer starts')}`),
+    h('div', { html: `<span class="muted">cards</span> <b style="color:var(--flag)">${cpu.length} Computer</b> <span class="small muted">(${oppLabel})</span>` })),
+    h('div', { style: 'display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:6px;border:1px solid var(--line)' }, h('div', { style: `width:${(100 * share).toFixed(1)}%;background:var(--accent)` }), h('div', { style: `flex:1;background:var(--flag)` })));
+  /* table */
+  const tb = $('#vsTable'); tb.innerHTML = '';
+  if (st.phase === 'over') {
+    tb.append(h('h3', {}, st.winner === 0 ? 'You win!' : st.winner === 1 ? 'The computer wins' : 'Draw'), h('p', {}, st.endReason + ` The game lasted ${st.sets.length} sets.`), h('button', { class: 'btn', onclick: vsNew }, 'Play again'));
+  } else if (st.phase === 'deal') {
+    tb.append(h('h3', {}, 'New game'), h('p', {}, `A shuffled deck of ${st.N} footballer cards. Deal them out: half to you, half to the computer.`),
+      h('div', { class: 'vsrow' }, vsBack(st.deck.length, { onclick: vsDeal, text: st.dealing ? 'dealing…' : 'tap to deal', label: 'Deal the cards' }),
+        h('div', { class: 'vsside' }, h('span', { class: 'tag a' }, 'You'), h('span', { class: 'mono' }, String(me.length))), h('div', { class: 'vsside' }, h('span', { class: 'tag b' }, 'Computer'), h('span', { class: 'mono' }, String(cpu.length)))));
+  } else if (st.phase === 'arrange') {
+    tb.append(h('h3', {}, 'Before set ' + st.setNo), h('p', { class: 'small', html: st.starter === 0 ? 'You <b>start</b> this set. Your first card can only be hit, never hit back, so make it hard to match.' : 'The computer <b>starts</b> this set. Your first card gets the first real attack: it tries to match their opener.' }));
+    if (st.lastSet) tb.append(vsPileRow(st.lastSet.pile, st.lastSet), h('p', { class: 'small muted' }, 'Last set, shown above. The matching pair is outlined.'));
+  } else {
+    tb.append(h('h3', {}, 'Set ' + st.setNo + (st.phase === 'setover' ? ': finished' : ': in play')));
+    const myTurn = st.phase === 'playing' && st.turn === 0;
+    tb.append(h('div', { class: 'vsrow' }, h('div', { class: 'vsside' }, h('span', { class: 'tag b' }, 'Computer'), vsBack(cpu.length, { text: st.phase === 'playing' && st.turn === 1 ? 'playing…' : 'cards' })),
+      h('div', { style: 'flex:1;min-width:0' }, vsPileRow(st.pile, st.phase === 'setover' ? st.lastSet : null))));
+    if (st.phase === 'playing') tb.append(h('div', { class: 'vsrow' }, h('div', { class: 'vsside' }, h('span', { class: 'tag a' }, 'You'), vsBack(me.length, { onclick: myTurn ? vsStep : null, text: myTurn ? 'tap to flip' : 'wait', label: myTurn ? 'Flip your top card' : 'Your deck' })),
+      h('p', { class: 'small', style: 'margin:0;align-self:center', html: myTurn ? (st.pile.length ? '<b>Your turn.</b> Flip your top card. If it shares a colour with the last card, the pile is yours.' : '<b>You open the set.</b> Flip your top card.') : 'The computer is laying a card…' })));
+    if (st.phase === 'playing' && st.turn === 1) { const tok = VS.token, n = st.pile.length; clearTimeout(VS.cpuT); VS.cpuT = setTimeout(() => { if (VS.token === tok && VS.st.phase === 'playing' && VS.st.turn === 1 && VS.st.pile.length === n) vsStep(); }, 750); }
+    if (st.phase === 'playing' && coach) {
+      const next = st.hands[st.turn][0]; const prev = st.pile.length ? st.pile[st.pile.length - 1].c : null;
+      let hint = st.turn === 0 ? 'Your turn: your next card is ' + (next ? vsShort(next.team) : '—') + '.' : 'Computer’s turn.';
+      if (coach && prev) { if (st.turn === 0 && next) hint += (next.mask & prev.mask) ? ' It <b>matches</b> the last card, so you’ll take the pile.' : ' It doesn’t match the last card.';
+        if (st.turn === 1) { const pHit = 1 - k.D[prev.mask]; hint += ` Chance their next card matches your ${vsShort(prev.team)}: about <b>${pct(pHit, 0)}</b>.`; } }
+      tb.append(h('p', { class: 'small muted', html: 'Hint: ' + hint }));
+    } else if (st.phase === 'setover') {
+      const L = st.lastSet; const gained = L.pile.filter(x => x.p !== L.winner).length;
+      tb.append(h('p', { html: `<b>${L.winner === 0 ? 'You' : 'The computer'}</b> matched on <b>${E.maskNames(L.shared, VS.scheme).join(' + ')}</b> and took ${L.pile.length} cards (${gained} from the other side).` }), h('button', { class: 'btn', onclick: vsNextSet }, 'Next set'));
+    }
+  }
+  /* hand */
+  const hd = $('#vsHand'); hd.innerHTML = '';
+  if (st.phase === 'arrange') {
+    const odds = vsOdds(me), best = coach ? vsCoachOrder() : null, bo = coach ? vsOdds(best) : null;
+    hd.append(h('div', { style: 'display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center' }, h('h3', { style: 'margin:0' }, 'Your hand · arrange it'),
+      h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' }, coach ? h('button', { class: 'btn ghost', onclick: () => { st.hands[0] = vsCoachOrder(); vsRender(); } }, 'Use coach’s order') : null, h('button', { class: 'btn ghost', onclick: () => { E.shuffle(st.hands[0], st.R); vsRender(); } }, 'Shuffle'), h('button', { class: 'btn', onclick: vsStartSet }, 'Start set'))));
+    if (coach) hd.append(h('div', { class: 'kpis', style: 'margin:10px 0' }, h('div', { class: 'kpi' }, h('div', { class: 'v', style: 'font-size:30px' }, pct(odds.win, 0)), h('div', { class: 'l' }, 'your chance to win this set')), h('div', { class: 'kpi' }, h('div', { class: 'v', style: 'font-size:30px' }, (odds.swing >= 0 ? '+' : '') + odds.swing.toFixed(1)), h('div', { class: 'l' }, 'expected cards gained')), coach ? h('div', { class: 'kpi' }, h('div', { class: 'v', style: 'font-size:30px;color:var(--muted)' }, pct(bo.win, 0)), h('div', { class: 'l' }, 'with the coach’s order')) : null));
+    hd.append(h('p', { class: 'small muted' }, 'Drag a card, or use the arrows, to change the order. Card 1 is laid first.' + (coach ? ' Each card shows the chance that the computer’s next card matches it, based on what you know.' : '')));
+    const row = h('div', { style: 'display:flex;flex-wrap:wrap;gap:4px;align-items:center' });
+    me.forEach((c, i) => {
+      if (coach && i > 0 && i < 12) { const rep = (me[i - 1].mask & c.mask) !== 0; row.append(h('span', { title: rep ? 'shares a colour with the previous card: wasted attack' : 'new colours: fresh attack', style: `font:700 16px var(--f-mono);color:${rep ? 'var(--bad)' : 'var(--good)'}` }, rep ? '↺' : '→')); }
+      const pHit = 1 - k.D[c.mask];
+      const extra = h('div', { style: 'display:grid;gap:2px;margin-top:4px' }, coach ? h('div', { class: 'mono', style: 'font-size:11px', title: 'chance the computer can match this card' }, 'hit ' + pct(pHit, 0)) : null,
+        h('div', { style: 'display:flex;justify-content:center;gap:2px' }, h('button', { class: 'chip', style: 'padding:0 7px', 'aria-label': 'move earlier', onclick: () => vsMove(i, i - 1) }, '◀'), h('button', { class: 'chip', style: 'padding:0 7px', 'aria-label': 'move later', onclick: () => vsMove(i, i + 1) }, '▶')));
+      const el = vsCardEl(c, extra); el.prepend(h('div', { class: 'tag ' + (i === 0 ? 'b' : ''), style: 'position:absolute;top:4px;left:4px' }, i === 0 ? 'opens' : String(i + 1)));
+      el.setAttribute('draggable', 'true'); el.style.cursor = 'grab';
+      el.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain', String(i)); });
+      el.addEventListener('dragover', e => e.preventDefault());
+      el.addEventListener('drop', e => { e.preventDefault(); const from = +e.dataTransfer.getData('text/plain'); vsMove(from, i); });
+      row.append(el);
+    });
+    hd.append(row);
+  } else {
+    hd.append(h('h3', {}, st.phase === 'deal' ? 'Your hand' : 'Your remaining cards (locked)'));
+    const row = h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px' }); me.slice(0, 16).forEach(c => row.append(vsCardEl(c))); if (me.length > 16) row.append(h('span', { class: 'muted small', style: 'align-self:center' }, '+' + (me.length - 16) + ' more')); hd.append(row);
+  }
+  /* knowledge */
+  const kn = $('#vsKnow'); kn.innerHTML = ''; kn.hidden = !coach;
+  const seen = cpu.length - k.unknown; const nm = E.SCHEMES[VS.scheme]; const tally = nm.map(() => 0); for (const c of cpu) if (st.revealed.has(c.id)) nm.forEach((_, i) => { if (c.mask >> i & 1) tally[i]++; });
+  let Hb = 0; for (const [, p] of k.dist) if (p > 0) Hb -= p * Math.log2(p);
+  kn.append(h('h3', {}, 'What you know about their hand'), h('p', { class: 'small', html: `They hold <b>${cpu.length}</b> cards. You’ve seen <b>${seen}</b> of them, because those cards were revealed in a pile they won. Uncertainty about their next card: <b>${Hb.toFixed(1)} bits</b>.` }));
+  const order = nm.map((n, i) => [n, tally[i]]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+  const bars = h('div', { class: 'bars' }); const mx = Math.max(1, ...tally);
+  for (const [n, t] of order) bars.append(h('div', { class: 'bar', style: 'grid-template-columns:18px 64px minmax(0,1fr) 28px' }, h('span', { class: 'sw', style: `background:${E.SWATCH[n]}` }), h('span', { class: 'small' }, n), h('div', { class: 'track' }, h('div', { class: 'fill', style: `width:${100 * t / mx}%` })), h('span', { class: 'mono small' }, String(t))));
+  if (order.length) kn.append(h('p', { class: 'small', style: 'margin:0 0 4px' }, 'Colours on their known cards:'), bars); else kn.append(h('p', { class: 'small muted' }, 'Nothing seen yet. You’re guessing from average football colours.'));
+  const missing = nm.filter((n, i) => tally[i] === 0 && E.familyFrequencies(pool).find(f => f.name === n).p > 0.05);
+  if (seen >= 3 && missing.length) kn.append(h('p', { class: 'small', html: `None of their known cards has <b>${missing.join(', ')}</b>. Shirts in those colours are good shields against them${k.unknown ? ', though the ' + k.unknown + ' unseen cards could still have them' : ''}.` }));
+  if (seen) { const icons = h('div', { style: 'display:flex;flex-wrap:wrap;gap:2px;margin-top:6px' }); cpu.filter(c => st.revealed.has(c.id)).forEach(c => icons.append(h('span', { title: c.team, html: shirtFromMask(c.mask, VS.scheme).replace('<svg', '<svg width="22" height="22"') }))); for (let i = 0; i < k.unknown; i++) icons.append(h('span', { title: 'unseen card', style: 'display:inline-block;width:16px;height:22px;margin:0 3px;border-radius:3px;background:repeating-linear-gradient(45deg,var(--line),var(--line) 3px,var(--card) 3px,var(--card) 6px);border:1px solid var(--muted)' })); kn.append(icons); }
+  /* white count */
+  const wc = $('#vsCountBox'); wc.innerHTML = ''; wc.hidden = !$('#vsWhite').checked;
+  if (!wc.hidden) {
+    const wb = 1 << E.SCHEMES[VS.scheme].indexOf('white'); const pw = st.popDist.get(wb) || 0;
+    let known = 0, unseen = 0; for (const c of cpu) { if (st.revealed.has(c.id)) { if (c.mask & wb) known++; } else unseen++; }
+    const n = cpu.length || 1, est = (known + unseen * pw) / n;
+    const verdict = est > pw + 0.08 ? ['White-heavy', 'var(--bad)', 'Don’t open with white. Use your white cards to attack right after a non-white card.'] : est < pw - 0.08 ? ['White-light', 'var(--good)', 'White is a decent shield right now: few of their cards are white.'] : ['Neutral', 'var(--muted)', 'About average. Play your usual shield + zig-zag.'];
+    wc.append(h('h3', {}, 'White count'), h('div', { style: 'display:flex;gap:14px;align-items:baseline;flex-wrap:wrap' },
+      h('div', {}, h('div', { style: 'font:800 40px/1 var(--f-display)' }, (known >= 0 ? '+' : '') + known), h('div', { class: 'small muted' }, 'running count')),
+      h('div', {}, h('div', { style: 'font:800 40px/1 var(--f-display)' }, pct(est, 0)), h('div', { class: 'small muted' }, 'chance their next card is white')),
+      h('span', { class: 'tag', style: `background:${verdict[1]};color:var(--paper)` }, verdict[0])),
+      h('p', { class: 'small', style: 'margin:8px 0 0' }, verdict[2]),
+      h('p', { class: 'small muted', style: 'margin:4px 0 0' }, `+1 for every white card that goes into their hand, −1 every time they lay one. ${known} known white of ${cpu.length} cards, ${unseen} unseen (average football: ${pct(pw, 0)} white). True count = (${known} + ${unseen} × ${pw.toFixed(2)}) ÷ ${n}.`));
+  }
+  /* coach */
+  const cb = $('#vsCoachBox'); cb.innerHTML = ''; cb.hidden = !coach;
+  if (coach) { cb.append(h('h3', {}, 'Coach')); const tips = vsTips(); const ul = h('div', { style: 'display:grid;gap:10px' }); tips.forEach(([t, b]) => ul.append(h('div', { class: 'insight' }, h('b', { style: 'font-size:16px' }, t), h('p', { class: 'small', style: 'margin:0', html: b })))); cb.append(ul); }
+  /* log */
+  const lg = $('#vsLog'); lg.innerHTML = ''; lg.append(h('h3', {}, 'Game so far'));
+  if (st.history.length > 1) lg.append(lineChart([{ pts: st.history.map((x, i) => [i, x[0]]), color: css('--accent'), label: 'your cards' }, { pts: st.history.map((_, i) => [i, st.N / 2]), color: css('--muted'), dash: true }], { h: 140, ymin: 0, ymax: st.N, xlabel: 'set', ylabel: 'cards' }));
+  const won = st.sets.filter(s => s.winner === 0).length; lg.append(h('p', { class: 'small' }, `Sets won: ${won} of ${st.sets.length}.` + (st.sets.length ? ` Sets won going second: ${st.sets.filter(s => s.winner === 0 && s.starter === 1).length}, starting: ${st.sets.filter(s => s.winner === 0 && s.starter === 0).length}.` : '')));
+}
+function vsPileRow(pile, L) {
+  const row = h('div', { style: 'display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-bottom:6px' });
+  pile.forEach((x, i) => { if (i > 0) row.append(h('span', { class: 'muted' }, '→')); const el = vsCardEl(x.c); el.style.borderBottom = `4px solid ${x.p === 0 ? 'var(--accent)' : 'var(--flag)'}`; if (L && (x.c === L.matchOn || x.c === L.matched)) { el.style.outline = '3px solid var(--ink)'; el.style.outlineOffset = '1px'; } el.prepend(h('div', { class: 'tag ' + (x.p === 0 ? 'a' : 'b'), style: 'position:absolute;top:4px;left:4px' }, x.p === 0 ? 'you' : 'cpu')); row.append(el); });
+  if (!pile.length) row.append(h('p', { class: 'muted small' }, 'No cards laid yet.'));
+  return row;
+}
+function vsTips() {
+  const st = VS.st, me = st.hands[0], k = vsKnowledge(0), tips = [];
+  if (st.phase === 'over') {
+    const won = st.sets.filter(s => s.winner === 0).length;
+    tips.push(['How it went', `You won ${won} of ${st.sets.length} sets. ${st.winner === 0 ? 'Well played.' : 'Try the coach’s order every set and watch the opener.'} Want a harder opponent? Pick “Card counter + optimiser”.`]); return tips;
+  }
+  if (st.phase === 'setover' && st.lastSet) {
+    const L = st.lastSet, mine = L.pile.filter(x => x.p === 0).map(x => x.c);
+    if (L.winner === 0) tips.push(['Why you won', `Your ${vsShort(L.matchOn.team)} shared ${E.maskNames(L.shared, VS.scheme).join(' + ')} with their ${vsShort(L.matched.team)}. Before the set you had a ${pct(L.oddsAtStart, 0)} chance to win it.`]);
+    else { const hit = L.matched; tips.push(['Why you lost', `Their ${vsShort(L.matchOn.team)} matched your ${vsShort(hit.team)} on ${E.maskNames(L.shared, VS.scheme).join(' + ')}. You had a ${pct(L.oddsAtStart, 0)} chance to win this set. ${E.popcount(hit.mask) > 1 ? 'Multi-colour shirts are easy targets: keep them for attacking right after a shield.' : ''}`]); }
+    tips.push(['New information', `You just saw ${L.pile.filter(x => x.p === 1).length} of their cards. ${L.winner === 1 ? 'They went back into their hand, so you now know some of what they hold.' : 'They’re now in your hand.'} Check “What you know” before the next set.`]);
+    tips.push(['Next set', L.winner === 0 ? 'You start the next set, so your opener will be exposed. Lead with your safest shirt.' : 'The computer starts next, so you go second. Your first card attacks their opener: lead with a big hitter.']);
+    return tips;
+  }
+  if (st.phase === 'deal') { tips.push(['Get ready', 'Deal the cards. Before the first set you’ll arrange your hand. Start with a rare shirt if you open, then switch colour groups.']); return tips; }
+  if (st.phase === 'playing') { tips.push(['During the set', 'The order is locked. Watch which cards survive: every card that’s revealed tells you about their hand for the next set.']); return tips; }
+  // arrange phase
+  const D = k.D, hits = me.map(c => 1 - D[c.mask]);
+  const odds = vsOdds(me), best = vsCoachOrder(), bo = vsOdds(best);
+  if (st.starter === 0) {
+    const iMin = hits.indexOf(Math.min(...hits));
+    tips.push(['1 · Pick a shield', hits[0] <= Math.min(...hits) + 0.02 ? `Good: your opener ${vsShort(me[0].team)} can only be matched ${pct(hits[0], 0)} of the time.` : `Your opener ${vsShort(me[0].team)} gets matched ${pct(hits[0], 0)} of the time. ${vsShort(me[iMin].team)} (${E.maskNames(me[iMin].mask, VS.scheme).join(' + ')}) only ${pct(hits[iMin], 0)}. Move it to the front.`]);
+  } else {
+    const iMax = hits.indexOf(Math.max(...hits));
+    tips.push(['1 · Open with a hitter', `You go second, so your first card attacks their opener straight away. ${vsShort(me[iMax].team)} (${E.maskNames(me[iMax].mask, VS.scheme).join(' + ')}) hits ${pct(hits[iMax], 0)} of their likely cards${iMax === 0 ? ', and it’s already first. Good.' : '. Consider it, unless you want to hold it back.'}`]);
+  }
+  const reps = []; for (let i = 1; i < Math.min(me.length, 8); i++) if (me[i - 1].mask & me[i].mask) reps.push(i);
+  tips.push(['2 · Zig-zag', reps.length ? `Cards ${reps.map(i => i + '→' + (i + 1)).join(', ')} share a colour (↺). A card that survives the first will usually survive the second, so switch colour groups there.` : 'No repeats in your first cards: every card is a fresh attack.']);
+  const top = me.map((c, i) => [c, hits[i]]).sort((a, b) => b[1] - a[1]).slice(0, 2);
+  tips.push(['3 · Aim at what they hold', k.unknown === st.hands[1].length ? `You haven’t seen any of their cards yet, so the hit chances are for average football. Your strongest attackers: ${top.map(([c, p]) => vsShort(c.team) + ' (' + pct(p, 0) + ')').join(', ')}.` : `Based on the ${st.hands[1].length - k.unknown} cards you’ve seen, your best attackers against them are ${top.map(([c, p]) => vsShort(c.team) + ' (' + pct(p, 0) + ')').join(' and ')}. Put them right after your opener.`]);
+  tips.push(['4 · Your odds', bo.win - odds.win > 0.03 ? `Your order wins this set ${pct(odds.win, 0)} of the time. The coach’s order would win ${pct(bo.win, 0)}. Press “Use coach’s order” to see it, then compare.` : `Your order is as good as the coach’s (${pct(odds.win, 0)} to win this set).`]);
+  return tips;
+}
+
+for (const n of Object.keys(E.STRATEGIES)) $('#vsOpp').append(h('option', { value: n }, E.STRATEGIES[n].label));
+$('#vsOpp').value = 'zigzag';
+$('#vsOpp').onchange = () => { if (VS.st) { VS.st.opp = $('#vsOpp').value; vsRender(); } };
+$('#vsNew').onclick = vsNew; $('#vsCoach').onchange = vsRender; $('#vsWhite').onchange = vsRender;
+
+/* ---------- distributions tab ---------- */
+function groupedBars(cats, series, {h:H=180, fmt=x=>pct(x,0)}={}){
+  const W=540, L=36, B=34, T=8, gw=(W-L-8)/cats.length, bw=Math.min(16,(gw-6)/series.length); const mx=Math.max(...series.flatMap(s=>s.vals))||1;
+  const Y=v=>T+(H-T-B)*(1-v/mx);
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:420px">`;
+  for(let k=0;k<=4;k++){ const v=mx*k/4; s+=`<line class="gridl" x1="${L}" x2="${W-8}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-4}" y="${Y(v)+3}" text-anchor="end" font-size="10" style="fill:var(--muted)">${fmt(v)}</text>`; }
+  cats.forEach((c,i)=>{ const x0=L+i*gw+(gw-bw*series.length)/2; series.forEach((sr,j)=>{ const v=sr.vals[i]; s+=`<rect x="${(x0+j*bw).toFixed(1)}" y="${Y(v).toFixed(1)}" width="${(bw-1.5).toFixed(1)}" height="${(Y(0)-Y(v)).toFixed(1)}" fill="${sr.color}" rx="1.5"><title>${sr.name} · ${c}: ${fmt(v)}</title></rect>`; });
+    s+=`<text x="${(L+i*gw+gw/2).toFixed(1)}" y="${H-B+14}" text-anchor="middle" font-size="11">${c}</text>`; });
+  const leg=series.map(sr=>`<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px"><span style="width:12px;height:12px;border-radius:2px;background:${sr.color};display:inline-block"></span>${sr.name}</span>`).join('');
+  return h('div',{class:'scroll',html:s+'</svg><div class="small" style="margin-top:4px">'+leg+'</div>'}); }
+const SER=()=>[css('--accent'),css('--flag'),css('--muted'),css('--bad')];
+function variant(f, dataOverride){ const c=JSON.parse(JSON.stringify(cfg)); f(c); return E.buildPool(dataOverride||data,c); }
+function famShares(p){ return Object.fromEntries(E.familyFrequencies(p).map(f=>[f.name,f.p])); }
+function renderDist(){
+  if(!pool) return; const S=SER(), names=E.SCHEMES[pool.scheme];
+  // facts
+  const fr=E.familyFrequencies(pool).sort((a,b)=>b.p-a.p); const allP=(cfg.colour.rule||'dominant')==='dominant'?variant(c=>{c.colour.rule='all';}):pool; const nc=[0,0,0,0,0,0]; for(const [m,q] of allP.masks) nc[Math.min(5,E.popcount(m))]+=q;
+  const combos=[...pool.masks.values()].sort((a,b)=>b-a); const top5=combos.slice(0,5).reduce((a,b)=>a+b,0); const big=fr.filter(f=>f.p>=0.05);
+  let H=0; for(const q of combos) H-=q*Math.log2(q);
+  const home=variant(c=>{c.kit_usage={home:1,away:0,third:0};}), away=variant(c=>{c.kit_usage={home:0,away:1,third:0};}), third=variant(c=>{c.kit_usage={home:0,away:0,third:1};});
+  const fh=famShares(home), fa=famShares(away), ft=famShares(third);
+  const facts=[
+    [`${big.length} colours do almost all the work`, `${big.map(f=>f.name+' '+pct(f.p,0)).join(', ')}. Every other colour is on fewer than 5% of shirts.`],
+    ...((cfg.colour.rule||'dominant')==='dominant'?[['The deck behaves like '+(1/combos.reduce((a,q)=>a+q*q,0)).toFixed(1)+' equal colours', `With one colour per card, two random cards match with probability Σp² = ${pct(combos.reduce((a,q)=>a+q*q,0),0)}. That’s the same as a deck with ${(1/combos.reduce((a,q)=>a+q*q,0)).toFixed(1)} equally common colours. Ecologists call 1/Σp² the inverse Simpson index.`]]:[]),
+    ['Shirts are simple', `Looking at every colour on the shirt: ${pct(nc[1],0)} of shirts have one main colour, ${pct(nc[2],0)} have two and ${pct(nc[3]+nc[4]+nc[5],0)} have three or more.`],
+    ['A few shirts dominate', `${combos.length} different colour combinations exist, but the top 5 make up ${pct(top5,0)} of all cards.`],
+    [(fa.white||0)>(fh.white||0)?'Away means white':'Away kits swap colours', `White is on ${pct(fa.white||0,0)} of away shirts against ${pct(fh.white||0,0)} of home shirts. Red goes from ${pct(fh.red||0,0)} at home to ${pct(fa.red||0,0)} away, because away kits exist to avoid clashing with the home team.`],
+    ['Third kits are the fashion kits', `Black is on ${pct(ft.black||0,0)} of third shirts (home: ${pct(fh.black||0,0)}). Grey, pink and purple appear mostly here.`],
+    ['Information per card', `Each card carries about ${H.toFixed(1)} bits of colour information (entropy). Card counting works by shrinking that uncertainty.`],
+  ];
+  const fx=$('#dFacts'); fx.innerHTML=''; for(const [t,b] of facts) fx.append(h('div',{class:'insight'},h('b',{},t),h('p',{style:'margin:0'},b)));
+  // kits chart
+  const cats=fr.filter(f=>f.p>0.005).map(f=>f.name).slice(0,9);
+  $('#dKits').innerHTML=''; $('#dKits').append(groupedBars(cats,[{name:'Home',color:S[0],vals:cats.map(c=>fh[c]||0)},{name:'Away',color:S[1],vals:cats.map(c=>fa[c]||0)},{name:'Third',color:S[2],vals:cats.map(c=>ft[c]||0)}]));
+  // clubs vs national (home kits, all men's teams of each type, no fame)
+  const cl=variant(c=>{c.kit_usage={home:1,away:0,third:0};c.popularity.top_n=0;c.deck_population.national=false;c.deck_population.clubs=true;});
+  const na=variant(c=>{c.kit_usage={home:1,away:0,third:0};c.popularity.top_n=0;c.deck_population.clubs=false;c.deck_population.national=true;});
+  const fc=famShares(cl), fn=famShares(na);
+  $('#dNat').innerHTML=''; $('#dNat').append(groupedBars(cats,[{name:`Clubs (${cl.teams.toLocaleString()})`,color:S[0],vals:cats.map(c=>fc[c]||0)},{name:`National teams (${na.teams})`,color:S[1],vals:cats.map(c=>fn[c]||0)}]),
+    h('p',{class:'small'},`Top national colour: ${Object.entries(fn).sort((a,b)=>b[1]-a[1])[0][0]}. Black: ${pct(fn.black||0,0)} of national shirts against ${pct(fc.black||0,0)} of club shirts.`));
+  // lift
+  const G=E.colourGraph(pool), rows=[]; for(let i=0;i<names.length;i++) for(let j=i+1;j<names.length;j++){ const pij=G.co[i][j], pi=G.co[i][i], pj=G.co[j][j]; if(pij>0.005) rows.push([names[i],names[j],pij,pij/(pi*pj)]); }
+  rows.sort((a,b)=>b[3]-a[3]); const lt=h('table',{class:'tbl'}); lt.append(h('tr',{},h('th',{},'Pair'),h('th',{},'On shirts'),h('th',{},'Lift')));
+  const mxL=Math.max(...rows.map(r=>r[3]),1);
+  for(const [a,b,pij,lf] of rows){ lt.append(h('tr',{},h('td',{},h('span',{class:'sw',style:`background:${E.SWATCH[a]};vertical-align:middle`}),' ',h('span',{class:'sw',style:`background:${E.SWATCH[b]};vertical-align:middle`}),' '+a+' + '+b),h('td',{class:'mono'},pct(pij,1)),h('td',{},h('div',{class:'pbar'},h('span',{class:'mono small',style:'width:36px'},lf.toFixed(2)),h('div',{class:'track'},h('div',{class:'fill',style:`width:${(100*lf/mxL).toFixed(0)}%;background:${lf>=0.7?css('--accent'):css('--bad')}`})))))); }
+  $('#dLift').innerHTML=''; $('#dLift').append(lt);
+  // zipf
+  const zp=combos.slice(0,60).map((q,i)=>[Math.log10(i+1),Math.log10(q)]); const n=zp.length, mx=zp.reduce((a,p)=>a+p[0],0)/n, my=zp.reduce((a,p)=>a+p[1],0)/n; let sxy=0,sxx=0; zp.forEach(([x,y])=>{sxy+=(x-mx)*(y-my);sxx+=(x-mx)**2;}); const sl=sxy/sxx, ic=my-sl*mx;
+  $('#dZipf').innerHTML=''; $('#dZipf').append(lineChart([{pts:zp,color:css('--accent'),label:'real combinations'},{pts:[[0,ic],[zp[n-1][0],ic+sl*zp[n-1][0]]],color:css('--flag'),dash:true,label:'power law, slope '+sl.toFixed(2)}],{h:180,ymin:Math.floor(Math.min(...zp.map(p=>p[1]))),ymax:0,xlabel:'log₁₀ rank',ylabel:'log₁₀ share',yfmt:v=>'10^'+v}),
+    h('p',{class:'small'},'Most common: '+[...pool.masks].sort((a,b)=>b[1]-a[1]).slice(0,3).map(([m,q])=>E.maskNames(m,pool.scheme).join('+')+' '+pct(q,0)).join(', ')+'.'));
+  // concept map
+  $('#dMap').innerHTML=`<svg viewBox="0 0 760 210" width="100%" style="min-width:600px" role="img" aria-label="Map of which part of the game follows which distribution">
+   ${[['One comparison','Bernoulli','p = '+pct(E.matchProbability(pool),0),20],['Cards in a set','≈ Geometric','waiting for the first match',210],['Sets in a game','Random walk','gambler’s ruin',400],['Your hand','Binomial → Poisson','for rare colours',590]].map(([a,b,c,x])=>`
+    <rect x="${x}" y="20" width="160" height="78" rx="8" fill="var(--card)" stroke="var(--ink)" stroke-width="1.5"/><text x="${x+80}" y="44" text-anchor="middle" font-size="13" font-weight="700">${a}</text><text x="${x+80}" y="66" text-anchor="middle" font-size="12" style="fill:var(--accent)" font-weight="700">${b}</text><text x="${x+80}" y="85" text-anchor="middle" font-size="11" style="fill:var(--muted)">${c}</text>`).join('')}
+   <path d="M180 59 H210 M370 59 H400" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar2)"/>
+   <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+   ${[['Birthday problem','when do 2 cards share a colour?',95],['Coupon collector','cards to see every colour',305],['Zipf / power law','frequency of combinations',515]].map(([a,b,x])=>`<rect x="${x}" y="128" width="190" height="58" rx="8" fill="none" stroke="var(--muted)" stroke-dasharray="4 3"/><text x="${x+95}" y="152" text-anchor="middle" font-size="12" font-weight="700">${a}</text><text x="${x+95}" y="170" text-anchor="middle" font-size="11" style="fill:var(--muted)">${b}</text>`).join('')}
+  </svg><p class="small muted">Solid boxes are part of play. Dashed boxes are classic problems the deck reproduces.</p>`;
+  // poisson
+  const sel=$('#dPoisCol'); const prev=sel.value; sel.innerHTML=''; for(const f of fr.filter(f=>f.p>0.002)) sel.append(h('option',{value:f.name},f.name+' ('+pct(f.p,1)+')')); sel.value=prev&&[...sel.options].some(o=>o.value===prev)?prev:(fr.find(f=>f.name==='green')||fr[fr.length>4?4:0]).name;
+  drawPoisson();
+  // colours per shirt vs 1+poisson (always measured with the every-colour reading of the shirt)
+  let mean=0; for(const [m,q] of allP.masks) mean+=q*E.popcount(m); const lam=mean-1, fact=[1,1,2,6,24];
+  const pk=[1,2,3,4].map(k=>Math.exp(-lam)*lam**(k-1)/fact[k-1]);
+  $('#dNcol').innerHTML=''; $('#dNcol').append(groupedBars(['1','2','3','4+'],[{name:'Real shirts',color:S[0],vals:[nc[1],nc[2],nc[3],nc[4]+nc[5]]},{name:'1 + Poisson (same mean '+mean.toFixed(2)+')',color:S[1],vals:pk}],{h:170}));
+  // geometric
+  const q=E.matchProbability(pool); const geo=[]; for(let L=2;L<=10;L++) geo.push([L,q*(1-q)**(L-2)]);
+  const haz=[]; let surv=1; for(let L=2;L<=12;L++){ haz.push([L,pEnd[L]/surv]); surv-=pEnd[L]; }
+  $('#dGeo').innerHTML=''; $('#dGeo').append(lineChart([{pts:pEnd.slice(2,11).map((v,i)=>[i+2,v]),color:css('--accent'),label:'exact'},{pts:geo,color:css('--flag'),dash:true,label:'geometric, p = '+pct(q,0)}],{h:170,ymin:0,ymax:Math.max(q,pEnd[2])*1.05,xlabel:'card the set ends on',ylabel:'probability',yfmt:v=>pct(v,0)}),
+    lineChart([{pts:haz,color:css('--accent'),label:'chance the set ends at this card, if still going'}],{h:130,ymin:0,ymax:Math.max(...haz.map(x=>x[1]))*1.1,xlabel:'card',ylabel:'hazard',yfmt:v=>pct(v,0)}),
+    h('p',{class:'small'},`The first comparison ends the set ${pct(haz[0][1],0)} of the time. After that the per-card rate settles at about ${pct(haz[haz.length-1][1],0)}.`));
+  // birthday + coupon + game length (simulation, quick)
+  const R=E.rng(31), draw=E.sampler(pool); const bd=[]; for(let n2=2;n2<=7;n2++){ let ok=0; const T=20000; for(let t=0;t<T;t++){ let u=0,good=true; for(let i=0;i<n2;i++){ const m=draw(R).mask; if(u&m){good=false;break;} u|=m; } ok+=good; } bd.push([String(n2),1-ok/T]); }
+  $('#dBday').innerHTML=''; $('#dBday').append(barChart(bd,{h:150,fmt:x=>pct(x,0)}), h('p',{class:'small'},'Chance that at least two of n random cards share a colour. n is on the axis.'));
+  const need=fr.filter(f=>f.p>0.02).map(f=>names.indexOf(f.name)).reduce((a,i)=>a|1<<i,0), nNeed=E.popcount(need); const cc=[]; let tot=0; const T2=6000; for(let t=0;t<T2;t++){ let seen=0,k=0; while((seen&need)!==need&&k<2000){ seen|=draw(R).mask; k++; } cc.push(k); tot+=k; } cc.sort((a,b)=>a-b);
+  const hn=Array.from({length:nNeed},(_,i)=>nNeed/(i+1)).reduce((a,b)=>a+b,0);
+  $('#dCoupon').innerHTML=''; $('#dCoupon').append(h('div',{class:'kpis'},h('div',{class:'kpi'},h('div',{class:'v'},(tot/T2).toFixed(0)),h('div',{class:'l'},`cards on average to see all ${nNeed} common colours`)),h('div',{class:'kpi'},h('div',{class:'v'},hn.toFixed(0)),h('div',{class:'l'},'if those colours were equally common')),h('div',{class:'kpi'},h('div',{class:'v'},cc[Math.floor(T2*0.9)]),h('div',{class:'l'},'cards needed in the unlucky 10% of cases'))));
+  const N=+$('#deckSize').value||40, mk=E.makeDeckFactory(pool,N), o={R,F:pool.F,popD:E.missTable(pool.masks,pool.F),popDist:pool.masks,maxSets:20000}; const GL=[]; for(let g=0;g<600;g++) GL.push(E.playGame(mk(R),'random','random',o).sets); GL.sort((a,b)=>a-b);
+  const gm=GL.reduce((a,b)=>a+b,0)/GL.length, gsd=Math.sqrt(GL.reduce((a,b)=>a+(b-gm)**2,0)/GL.length); const bins=12, bwid=Math.ceil(GL[Math.floor(GL.length*0.98)]/bins); const hist=new Array(bins).fill(0); for(const x of GL) hist[Math.min(bins-1,Math.floor(x/bwid))]++;
+  $('#dGame').innerHTML=''; $('#dGame').append(barChart(hist.map((c,i)=>[(i*bwid)+(i===bins-1?'+':''),c/GL.length]),{h:150,fmt:x=>pct(x,0)}),
+    h('p',{class:'small'},`${N}-card deck, both players random, 600 games: mean ${gm.toFixed(0)} sets, standard deviation ${gsd.toFixed(0)}, median ${GL[GL.length>>1]}, longest ${GL[GL.length-1]}. Bars show the number of sets.`));
+}
+function drawPoisson(){
+  const col=$('#dPoisCol').value, p=(E.familyFrequencies(pool).find(f=>f.name===col)||{p:0}).p, n=20, lam=n*p, K=Math.min(10,Math.max(6,Math.ceil(lam+3*Math.sqrt(lam)+1)));
+  const fact=k=>{let r=1;for(let i=2;i<=k;i++)r*=i;return r;}, C=(n,k)=>{let r=1;for(let i=0;i<k;i++)r=r*(n-i)/(i+1);return r;};
+  const bin=[],poi=[]; for(let k=0;k<=K;k++){ bin.push(C(n,k)*p**k*(1-p)**(n-k)); poi.push(Math.exp(-lam)*lam**k/fact(k)); }
+  let tv=0; for(let k=0;k<=n;k++){ const b=C(n,k)*p**k*(1-p)**(n-k), q=Math.exp(-lam)*lam**k/fact(k); tv+=Math.abs(b-q); } tv/=2;
+  const S=SER(); $('#dPois').innerHTML=''; $('#dPois').append(groupedBars([...Array(K+1).keys()].map(String),[{name:'Binomial (exact)',color:S[0],vals:bin},{name:'Poisson('+lam.toFixed(2)+')',color:S[1],vals:poi}],{h:170}),
+    h('p',{class:'small'},`Cards that show ${col} in a 20-card hand. The two curves differ by ${pct(tv,1)} in total (total variation). Rare colours stay close, while common colours like white drift far from Poisson.`));
+}
+$('#dPoisCol').onchange=drawPoisson;
+
+/* ---------- strategies tab ---------- */
+
+const EXPLAIN={
+  random:{idea:'Shuffle and hope. Every card is equally likely in every position.',how:['Mix the cards without looking.'],verdict:'The baseline. It wins about half its games against itself and is surprisingly hard to beat with “obvious” plans.'},
+  keep:{idea:'Never reorder. Won cards go to the bottom and the rest stays as it was, like the card game War.',how:['Put the pile you win under your deck.','Never touch the order.'],verdict:'About as good as random. The order carries no thinking, so it’s effectively luck.'},
+  colourful:{idea:'Lead with the shirts that have the most colours, because they match more often.',how:['Count colours on each shirt.','Most colours first.'],verdict:'Backfires in the every-colour variant: a many-coloured shirt is as easy to hit as it is to hit with. With one colour per card every card counts the same, so this is just a random order.'},
+  plain:{idea:'Lead with single-colour shirts, which are harder to hit.',how:['Count colours on each shirt.','Fewest colours first.'],verdict:'Only matters in the every-colour variant. With one colour per card it’s the same as a random order.'},
+  common:{idea:'Lead with the shirts whose colours are most common in football (white, red, blue).',how:['Rank by how often a random card would match.','Highest first.'],verdict:'The worst plan. The opener is easy to hit, and common shirts share colours with each other, so every follow-up attack is wasted.'},
+  rare:{idea:'Lead with the shirts nobody can match, holding the hitters back.',how:['Rank by match chance.','Lowest first.'],verdict:'A great opener, but then it keeps playing weak, rare cards that can’t win the pile.'},
+  role:{idea:'Treat the opener differently: rarest card first if you start, then common hitters.',how:['If you start: rarest card first.','Then common colours first.'],verdict:'Fixes the opener but still stacks common colours after it, so the attacks get wasted.'},
+  diversify:{idea:'Make every card a fresh attack: choose the next card to share no colour with the previous one.',how:['Pick the card that best hits what slipped past your last card.','Penalise easy-to-hit cards.'],verdict:'A good idea with a bad opener. It starts with a common shirt that gets hit straight away.'},
+  mixzz:{idea:'Poker’s balanced play. Choose your opener at random among your three safest cards, then zig-zag.',how:['Rank your cards by how hard they are to match (using your count).','Pick one of the top three at random as the opener.','Zig-zag the rest.'],verdict:'Trades a little opener safety for unpredictability. It matters most against opponents who read you.'},
+  exploit:{idea:'Poker’s player reading. Watch which colours this opponent opens and replies with, then target those habits.',how:['Remember their first card in every set.','When they start: lead the card most likely to match their usual opener.','When you start: avoid the colours they usually reply with.'],verdict:'Strong against predictable strategies, but there’s little to read in a random player.'},
+  gambit:{idea:'Chess gambit. When you’re ahead and have to start, sacrifice: open with an easy-to-match card, lose one card, and get the better seat (going second) next set.',how:['If you start and hold at least as many cards: open with your most common colour.','Otherwise play shield + zig-zag with your count.'],verdict:'Tests whether the second seat is worth a card.'},
+  riskaware:{idea:'Backgammon’s score-aware play. Ahead: choose orders with small, safe swings. Behind: choose orders with bigger, riskier swings.',how:['Measure your lead.','Score each order by expected gain ± 0.6 × its spread (minus when ahead, plus when behind).'],verdict:'Changes how a game unfolds; see the table for whether it changes who wins.'},
+  tempo:{idea:'Chess tempo / backgammon equity. Losing a set isn’t all bad: you go second next time, which is worth about two-thirds of a card in the default deck.',how:['Score = expected cards this set + ½ × value of the seat you’ll get next set.','Optimise the order for that score.'],verdict:'A one-step lookahead past the current set.'},
+  rackleave:{idea:'Scrabble’s rack leave. Not all cards are equal: rare colours are future shields, so losing one hurts more than losing a white card.',how:['Value each card by how hard it is to match.','Pick the order that maximises the value gained minus the value lost.'],verdict:'Protects the assets that make good openers later.'},
+  whitecount:{idea:'Blackjack-style counting with a single number: how many white cards are known to be in their hand.',how:['+1 when a white card goes into their hand, −1 when they lay one.','True count = (known whites + unseen × average white share) ÷ their hand size.','Then play shield + zig-zag using that estimate.'],verdict:'The easiest counting system to use at the table. See the counting study for how much of the full counter’s edge it keeps.'},
+  twocount:{idea:'Two running counts: white and red, the two most common card colours.',how:['Keep a white count and a red count.','Estimate their chances of white and red; assume average for the rest.','Shield + zig-zag with those estimates.'],verdict:'One extra number to remember; compare it with the one-count version in the study.'},
+  fullzz:{idea:'Perfect memory of every revealed card, but the simple shield + zig-zag ordering.',how:['Remember every card that went into their hand.','Use the exact mix to choose shield and hitters.'],verdict:'Separates the value of memory from the value of the optimiser.'},
+  zigzag:{idea:'Shield, then zig-zag. Open with your rarest shirt, then keep switching colour group.',how:['① Rarest shirt first (the shield).','② Then the card most likely to hit a card that MISSED your previous one.','In practice: never lay the same colour twice in a row: red → blue → white → red …'],verdict:'Simple enough to play in your head, and about as strong as the exact optimiser. With one colour per card it even beats it head to head.'},
+  optimal:{idea:'Calculates the exact chance of winning the next set for an order, then improves the order by swapping cards.',how:['Formula: P(win), using real colour frequencies.','Keep swapping pairs while the expected card gain improves.'],verdict:'Strong, and it discovers the shield + zig-zag pattern on its own.'},
+  counter:{idea:'The optimiser plus memory. It remembers every revealed card, so it knows much of what the opponent holds.',how:['Track which cards went to the opponent.','Optimise against those cards instead of “average football”.'],verdict:'The best strategy found. Memory adds several points of win rate over the same optimiser without it.'},
+};
+let handSeed=2024;
+function exampleHand(){ const R=E.rng(handSeed), draw=E.sampler(pool); const seen=new Set(), hand=[]; let guard=0;
+  while(hand.length<8&&guard++<500){ const e=draw(R); const key=e.mask+'|'+e.team; if(seen.has(key)) continue; seen.add(key); hand.push({id:hand.length,mask:e.mask,team:e.team,kit:e.kit}); }
+  return hand; }
+function stripSVG(order, popD){
+  const n=order.length, cw=62, W=n*cw+10, H=150; let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:${Math.min(W,480)}px" role="img" aria-label="Card order">`;
+  order.forEach((c,i)=>{ const x=5+i*cw;
+    if(i>0){ const share=(order[i-1].mask&c.mask)!==0; const x0=x-cw+31, x1=x+31; s+=`<path d="M${x0} 30 Q${(x0+x1)/2} 2 ${x1} 30" fill="none" stroke="${share?'var(--bad)':'var(--good)'}" stroke-width="3" ${share?'stroke-dasharray="5 4"':''}/>`; }
+    const t=teamIndex.get(c.team), cols=t&&t[10][c.kit]; const svg=(cols?shirtFromHex(cols):shirtFromMask(c.mask,pool.scheme)).replace('<svg ',`<svg x="${x+7}" y="34" width="48" height="48" `);
+    s+=svg;
+    if(i===0) s+=`<rect x="${x+6}" y="86" width="50" height="16" rx="4" fill="var(--flag)"/><text x="${x+31}" y="98" text-anchor="middle" font-size="10" font-weight="700" style="fill:#15212b">OPENER</text>`;
+    s+=`<text x="${x+31}" y="${i===0?116:98}" text-anchor="middle" font-size="11" class="mono">${Math.round(100*(1-popD[c.mask]))}%</text>`;
+    const nm=E.maskNames(c.mask,pool.scheme); nm.forEach((f,k)=>{ s+=`<circle cx="${x+31+(k-(nm.length-1)/2)*11}" cy="${i===0?126:110}" r="4.5" fill="${E.SWATCH[f]}" stroke="var(--muted)" stroke-width=".8"><title>${f}</title></circle>`; });
+    s+=`<text x="${x+31}" y="146" text-anchor="middle" font-size="10" style="fill:var(--muted)">${i+1}</text>`;
+  });
+  return s+'</svg>'; }
+function renderStrategyCards(){
+  if(!pool) return; const popD=E.missTable(pool.masks,pool.F), hand=exampleHand(); const box=$('#stratCards'); box.innerHTML='';
+  const T=pre.tournament, n=T.names.length, avg=Object.fromEntries(T.names.map((nm,i)=>[nm,T.winRate[i].reduce((a,b)=>a+b,0)/n]));
+  const vsR=nm=>{ const i=T.names.indexOf(nm), j=T.names.indexOf('random'); return i>=0&&j>=0&&i!==j?T.winRate[i][j]:null; };
+  for(const nm of Object.keys(E.STRATEGIES).sort((a,b)=>(avg[b]??0)-(avg[a]??0))){
+    const S=E.STRATEGIES[nm], X=EXPLAIN[nm]||{idea:S.why,how:[],verdict:''};
+    const R=E.rng(7); const order=S.fn({hand:hand.slice(),starter:true,oppLen:20,popD,countD:popD,F:pool.F,R,popDist:pool.masks,me:0,history:[]});
+    const o1=E.setOutcome(order.map(c=>c.mask),popD,true,20);
+    const repeats=order.slice(1).filter((c,i)=>(order[i].mask&c.mask)!==0).length;
+    const v=vsR(nm);
+    box.append(h('div',{class:'box',style:'display:grid;gap:10px'},
+      h('div',{style:'display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap'},h('h3',{style:'margin:0'},S.label),h('span',{class:'tag'},{none:'knows nothing',population:'knows colour frequencies',memory:'remembers seen cards'}[S.info])),
+      h('p',{style:'margin:0'},X.idea),
+      h('ol',{class:'small',style:'margin:0;padding-left:20px'},...X.how.map(t=>h('li',{},t))),
+      h('div',{class:'scroll',html:stripSVG(order,popD)}),
+      h('div',{class:'kpis',style:'grid-template-columns:repeat(auto-fit,minmax(110px,1fr))'},
+        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:28px'},pct(1-popD[order[0].mask],0)),h('div',{class:'l'},'chance the opener gets hit')),
+        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:28px'},repeats+' / 7'),h('div',{class:'l'},'wasted (repeat) attacks')),
+        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:28px'},pct(o1.win,0)),h('div',{class:'l'},'exact chance to win this set as starter')),
+        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:28px'},v==null?'50%':pct(v,0)),h('div',{class:'l'},'games won vs random (tournament)'))),
+      h('p',{class:'small',style:'margin:0;border-left:4px solid var(--flag);padding-left:10px'},h('b',{},'Verdict: '),X.verdict)));
+  }
+}
+$('#newHand').onclick=()=>{ handSeed++; renderStrategyCards(); };
+
+function renderStrategies(){
+  renderStrategyCards();
+  const T=pre.tournament, n=T.names.length, avg=Object.fromEntries(T.names.map((nm,i)=>[nm,T.winRate[i].reduce((a,b)=>a+b,0)/n]));
+  const tb=$('#stratTable'); tb.innerHTML=''; tb.append(h('tr',{},h('th',{},'Strategy'),h('th',{},'Knows'),h('th',{},'Idea'),h('th',{},'Avg win rate*')));
+  for(const nm of Object.keys(E.STRATEGIES).sort((a,b)=>(avg[b]??0)-(avg[a]??0))){ const s=E.STRATEGIES[nm]; tb.append(h('tr',{},h('td',{},h('b',{},s.label)),h('td',{class:'small'},{none:'nothing',population:'real colour frequencies',memory:'frequencies + every card seen'}[s.info]),h('td',{class:'small'},s.why),h('td',{},avg[nm]!=null?h('div',{class:'pbar'},h('span',{class:'mono small',style:'width:44px'},pct(avg[nm],0)),h('div',{class:'track'},h('div',{class:'fill',style:`width:${(100*avg[nm]).toFixed(0)}%`}))):'–'))); }
+  tb.append(h('tr',{},h('td',{colspan:'4',class:'small muted'},'* Average over the precomputed round robin: '+T.meta.games+' games per pairing, 40-card default deck.')));
+  const ed=$('#edges'); ed.innerHTML=''; for(const [t,b] of pre.edges) ed.append(h('div',{class:'insight'},h('b',{},t),h('p',{html:b})));
+  if(pre.vsRandom){ const V=pre.vsRandom, decks=Object.keys(V).filter(k=>k!=='deckSize'), rb=$('#robust'); rb.innerHTML='';
+    const hr=h('tr',{},h('th',{},'Strategy')); decks.forEach(d=>hr.append(h('th',{style:'white-space:normal;min-width:90px'},d+' ('+pct(V[d].pMatch,0)+' match)'))); rb.append(hr);
+    Object.keys(E.STRATEGIES).filter(n=>V[decks[0]][n]).sort((a,b)=>V[decks[0]][b].win-V[decks[0]][a].win).forEach(n=>{ const tr=h('tr',{},h('th',{style:'text-align:left'},E.STRATEGIES[n].label)); decks.forEach(d=>{ const w=V[d][n].win; const col=w>=0.5?css('--good'):css('--bad'); tr.append(h('td',{style:`background:color-mix(in srgb, ${col} ${(Math.min(1,Math.abs(w-0.5)*2.4)*85).toFixed(0)}%, transparent)`},(100*w).toFixed(0))); }); rb.append(tr); });
+    const DS=V.deckSize; if(DS){ const ks=Object.keys(DS); $('#deckSizeOut').innerHTML=''; $('#deckSizeOut').append(barChart(ks.map(k=>[k+' cards',DS[k].counterVsRandom]),{h:130,fmt:x=>pct(x,0)}), h('p',{class:'small'},'Card counter vs random by deck size. Small edges add up over many sets, so a bigger deck means more sets and less luck. Under random play a game lasts about '+ks.map(k=>Math.round(DS[k].randomExpectedSets)+' sets ('+k+')').join(', ')+'. That’s roughly N²: doubling the deck makes the game four times longer, the signature of a random walk.')); } }
+  if(pre.crossgame){ const C=pre.crossgame, ix=nm=>C.names.indexOf(nm), wr=(a,b)=>C.winRate[ix(a)][ix(b)], avgC=nm=>C.winRate[ix(nm)].reduce((x,y)=>x+y,0)/C.names.length;
+    const rows=[['♠ Poker','Balanced play: don’t be predictable','mixzz'],['♠ Poker','Read the player: exploit their habits','exploit'],['♞ Chess','Gambit: sacrifice a card to win the tempo','gambit'],['♞ Chess / ⚀ Backgammon','Equity lookahead: value of the next seat','tempo'],['⚀ Backgammon','Risk depends on the score','riskaware'],['🅂 Scrabble','Rack leave: protect your best tiles','rackleave'],['🂡 Blackjack','Running count (white + red)','twocount'],['🂡 Blackjack','Perfect count + simple play','fullzz'],['(baseline)','Shield + zig-zag','zigzag'],['(champion)','Card counter + optimiser','counter']].filter(r=>ix(r[2])>=0).sort((x,y)=>avgC(y[2])-avgC(x[2]));
+    const t=h('table',{class:'tbl'}); t.append(h('tr',{},h('th',{},'From'),h('th',{},'Idea'),h('th',{},'Strategy'),h('th',{},'Avg'),h('th',{},'vs random'),h('th',{},'vs zig-zag'),h('th',{},'vs card counter')));
+    const cell=v=>h('td',{class:'mono',style:`background:color-mix(in srgb, ${v>=0.5?css('--good'):css('--bad')} ${(Math.min(1,Math.abs(v-0.5)*2.4)*70).toFixed(0)}%, transparent)`},(100*v).toFixed(0));
+    rows.forEach(([g,idea,nm])=>t.append(h('tr',{},h('td',{},g),h('td',{class:'small'},idea),h('td',{},h('b',{},E.STRATEGIES[nm].label)),h('td',{class:'mono'},(100*avgC(nm)).toFixed(0)),cell(wr(nm,'random')),nm==='zigzag'?h('td',{},'·'):cell(wr(nm,'zigzag')),nm==='counter'?h('td',{},'·'):cell(wr(nm,'counter')))));
+    $('#crossOut').innerHTML=''; $('#crossOut').append(t); if(pre.crossNote) $('#crossNote').innerHTML=pre.crossNote; }
+  if(pre.counting){ const C=pre.counting, n=C.names.length, t=h('table',{class:'heat'}); t.append(h('tr',{},h('th',{},'row beats column →'),...C.names.map(nm=>h('th',{style:'white-space:normal;min-width:70px'},E.STRATEGIES[nm].label)),h('th',{},'avg')));
+    C.names.forEach((nm,i)=>{ const tr=h('tr',{},h('th',{style:'text-align:right'},E.STRATEGIES[nm].label)); C.names.forEach((_,j)=>{ const v=C.winRate[i][j]; const col=v>=0.5?css('--good'):css('--bad'); tr.append(h('td',{style:`background:color-mix(in srgb, ${col} ${(Math.min(1,Math.abs(v-0.5)*2.4)*85).toFixed(0)}%, transparent)`},i===j?'·':(100*v).toFixed(0))); }); tr.append(h('td',{style:'font-weight:700'},(100*C.winRate[i].reduce((a,b)=>a+b,0)/n).toFixed(0))); t.append(tr); });
+    $('#countStudy').innerHTML=''; $('#countStudy').append(t); if(pre.countingNote) $('#countNote').innerHTML=pre.countingNote; }
+  renderTournament(T, `Precomputed: ${T.meta.games} games per pairing, 40-card decks, project default settings. Numbers are % of games the row strategy wins. Run your own above.`);
+}
+function renderHeadline(q,second){ $('#headline').innerHTML=''; $('#headline').append(h('h3',{},'In one look'), h('div',{class:'kpis'},
+  h('div',{class:'kpi'},h('div',{class:'v'},pct(q,0)),h('div',{class:'l'},'chance a random card matches the previous one (default sticker deck)')),
+  h('div',{class:'kpi'},h('div',{class:'v'},pct(second,0)),h('div',{class:'l'},'of sets are won by the player who did NOT start')),
+  h('div',{class:'kpi'},h('div',{class:'v'},pre.headline.best),h('div',{class:'l'},'best strategy in the tournament')),
+  h('div',{class:'kpi'},h('div',{class:'v'},pre.headline.bestVsRandom),h('div',{class:'l'},'its win rate against random shuffling')))); }
+
+$('#dataCounts').textContent=`This build: ${data.teams.length.toLocaleString()} teams with kits, ${data.history.length.toLocaleString()} historical seasons. Raw scrape: ${data.meta.raw}.`;
+buildControls(); recompute(); renderStrategies();
+const start=(location.hash||'#rules').slice(1); show(TABS.some(t=>t[0]===start)?start:'rules');
+})();
+</script>
